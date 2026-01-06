@@ -1,3 +1,34 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
+from .models import Profile
 
-# Register your models here.
+
+class ProfileInline(admin.StackedInline):
+    model = Profile
+    can_delete = False
+    verbose_name_plural = 'Профиль'
+
+
+class CustomUserAdmin(UserAdmin):
+    inlines = (ProfileInline,)
+    list_display = ('username', 'email', 'first_name', 'last_name', 'get_role', 'is_staff')
+    list_filter = ('profile__role', 'is_staff', 'is_superuser')
+
+    def get_role(self, obj):
+        return obj.profile.get_role_display()
+
+    get_role.short_description = 'Роль'
+
+
+# Перерегистрируем User
+admin.site.unregister(User)
+admin.site.register(User, CustomUserAdmin)
+
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'role', 'games_played', 'games_uploaded', 'registration_date')
+    list_filter = ('role', 'is_verified')
+    search_fields = ('user__username', 'user__email')
+    readonly_fields = ('registration_date',)
