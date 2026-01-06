@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # мои app
+    # Сторонние приложения
+    'taggit',
+    # Наши приложения
     'accounts',
     'users',
     'games',
@@ -134,3 +136,17 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # Медиа файлы
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Настройки taggit
+TAGGIT_CASE_INSENSITIVE = True
+
+# Настройки медиа файлов
+MAX_UPLOAD_SIZE = 52428800  # 50MB в байтах
+ALLOWED_GAME_EXTENSIONS = ['.zip', '.rar', '.7z']
+ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+
+# Настройки игр
+GAMES_PER_PAGE = 12
+FEATURED_GAMES_COUNT = 6
+RECENT_GAMES_COUNT = 8
+POPULAR_GAMES_COUNT = 10

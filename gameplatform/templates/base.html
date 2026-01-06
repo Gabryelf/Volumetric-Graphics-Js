@@ -194,9 +194,13 @@
                     <a href="{% url 'home' %}">Главная</a>
                     {% if user.is_authenticated %}
                         <a href="#">Мои игры</a>
-                        {% if user.profile.role == 'developer' %}
-                            <a href="#">Загрузить игру</a>
-                        {% endif %}
+                            {% if user.is_authenticated and user.profile.role == 'developer' %}
+                                <a href="{% url 'game_upload' %}" class="nav-link">
+                                    <i class="fas fa-upload">
+
+                                    </i> Загрузить игру
+                                </a>
+                            {% endif %}
                         <a href="#">Таблица лидеров</a>
 
                         <div class="user-menu">
