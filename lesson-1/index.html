@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моя первая 3D игра</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden; /* Убираем прокрутку */
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">Используйте мышь для вращения камеры</div>
+    
+    <!-- Подключаем Three.js из CDN -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    
+    <script type="module">
+        // Импортируем Three.js
+        import * as THREE from 'three';
+
+        // 1. СОЗДАЁМ СЦЕНУ - это как театральные подмостки
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a1a2e); // Тёмно-синий фон
+
+        // 2. СОЗДАЁМ КАМЕРУ - глаза зрителя
+        const camera = new THREE.PerspectiveCamera(
+            75,                    // Угол обзора (в градусах)
+            window.innerWidth / window.innerHeight, // Соотношение сторон
+            0.1,                   // Ближняя плоскость отсечения
+            1000                   // Дальняя плоскость отсечения
+        );
+        camera.position.z = 5;   // Отодвигаем камеру от центра
+
+        // 3. СОЗДАЁМ РЕНДЕРЕР - художник, который рисует сцену
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight); // Размер как у окна
+        renderer.shadowMap.enabled = true; // Включаем тени (пригодятся позже)
+        document.body.appendChild(renderer.domElement); // Добавляем canvas на страницу
+
+        // 4. СОЗДАЁМ ГЕОМЕТРИЮ - форму объекта
+        const geometry = new THREE.BoxGeometry(1, 1, 1); // Куб 1x1x1
+
+        // 5. СОЗДАЁМ МАТЕРИАЛ - как выглядит поверхность
+        const material = new THREE.MeshStandardMaterial({ 
+            color: 0x00ff00,  // Зелёный цвет
+            roughness: 0.5,   // Шероховатость (0 - гладкий, 1 - матовый)
+            metalness: 0.1    // Металличность
+        });
+
+        // 6. СОЗДАЁМ МЕШ - комбинируем геометрию и материал
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube); // Добавляем куб на сцену
+
+        // 7. ДОБАВЛЯЕМ ОСВЕЩЕНИЕ - без света объекты будут чёрными
+        const ambientLight = new THREE.AmbientLight(0x404040, 1); // Рассеянный свет
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // Направленный свет
+        directionalLight.position.set(5, 5, 5); // Позиция источника света
+        scene.add(directionalLight);
+
+        // 8. АНИМАЦИЯ - заставляем объекты двигаться
+        function animate() {
+            requestAnimationFrame(animate); // Запускаем бесконечный цикл
+            
+            // Вращаем куб
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+            
+            // Рендерим сцену
+            renderer.render(scene, camera);
+        }
+
+        // Запускаем анимацию
+        animate();
+    </script>
+</body>
+</html>
