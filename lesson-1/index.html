@@ -4,28 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Моя первая 3D игра</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden; /* Убираем прокрутку */
-            font-family: Arial, sans-serif;
-        }
-        canvas {
-            display: block;
-        }
-        #info {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
-            background: rgba(0,0,0,0.7);
-            padding: 10px;
-            border-radius: 5px;
-        }
-    </style>
 </head>
 <body>
-    <div id="info">Используйте мышь для вращения камеры</div>
     
     <!-- Подключаем Three.js из CDN -->
     <script type="importmap">
@@ -79,7 +59,7 @@
         scene.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // Направленный свет
-        directionalLight.position.set(5, 5, 5); // Позиция источника света
+        directionalLight.position.set(15, 15, 15); // Позиция источника света
         scene.add(directionalLight);
 
         // 8. АНИМАЦИЯ - заставляем объекты двигаться
