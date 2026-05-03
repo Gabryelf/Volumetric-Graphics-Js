@@ -17,35 +17,6 @@
 
 ---
 
-## 📖 Содержание
-
-- [О проекте](#-о-проекте)
-- [Технологии](#-технологии)
-- [Что ты узнаешь](#-что-ты-узнаешь)
-- [Структура проекта](#-структура-проекта)
-- [Установка и запуск](#-установка-и-запуск)
-- [Пошаговое объяснение кода](#-пошаговое-объяснение-кода)
-  - [1. HTML-структура](#1-html-структура)
-  - [2. Импорт Three.js](#2-импорт-threejs)
-  - [3. Создание сцены](#3-создание-сцены)
-  - [4. Настройка камеры](#4-настройка-камеры)
-  - [5. Рендерер — холст для рисования](#5-рендерер--холст-для-рисования)
-  - [6. Геометрия — скелет объекта](#6-геометрия--скелет-объекта)
-  - [7. Материал — кожа объекта](#7-материал--кожа-объекта)
-  - [8. Меш — объединение формы и внешности](#8-меш--объединение-формы-и-внешности)
-  - [9. Система освещения](#9-система-освещения)
-  - [10. Цикл анимации](#10-цикл-анимации)
-- [Концептуальные основы](#-концептуальные-основы)
-  - [Система координат Three.js](#система-координат-threejs)
-  - [Как работает 3D-рендеринг?](#как-работает-3d-рендеринг)
-  - [Сравнение с реальным миром](#сравнение-с-реальным-миром)
-- [Часто задаваемые вопросы](#-часто-задаваемые-вопросы)
-- [Задания для самостоятельной работы](#-задания-для-самостоятельной-работы)
-- [Что дальше?](#-что-дальше)
-- [Ресурсы](#-ресурсы)
-
----
-
 ## 🌟 О проекте
 
 Этот проект — твой первый шаг в захватывающий мир создания 3D-игр прямо в браузере. Мы начинаем с самого простого: вращающегося куба. Но не обманывайся его простотой — этот куб содержит в себе все фундаментальные концепции, которые используются в профессиональных 3D-приложениях и играх.
@@ -99,51 +70,17 @@
 
 ---
 
-## 📁 Структура проекта
+# 🚀 УРОК 1: Модульная сцена - Пошаговая сборка с нуля
 
-```
-📦 threejs-first-steps/
- ┣ 📂 assets/              # Папка для будущих ресурсов
- ┃ ┣ 📂 textures/         # Текстуры
- ┃ ┣ 📂 models/           # 3D-модели
- ┃ ┗ 📂 sounds/           # Звуки
- ┣ 📜 index.html           # Главный файл проекта
- ┣ 📜 README.md            # Документация (этот файл)
- ┗ 📜 .gitignore           # Игнорируемые Git файлы
-```
+## Начало: создаём папку проекта
+
+Открываем эту папку в VS Code.
 
 ---
 
-## 🚀 Установка и запуск
+## ШАГ 1: Создаём index.html (скелет страницы)
 
-### Быстрый старт (3 простых шага)
-
-1. **Создай файл** `index.html` в любой папке
-
-2. **Скопируй код** из [раздела ниже](#-пошаговое-объяснение-кода)
-
-3. **Открой файл** в браузере:
-   - Двойной клик по файлу
-   - Или используй Live Server в VS Code
-   - Или запусти локальный сервер: `npx http-server`
-
-### Результат
-
-Ты увидишь:
-- 🟢 Зелёный вращающийся куб
-- 🌙 Тёмно-синий фон
-- 💡 Освещение, создающее объём
-- 📐 Корректную перспективу
-
-<div align="center">
-  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen1.png" alt="Результат" />
-</div>
-
----
-
-## 📝 Пошаговое объяснение кода
-
-### 1. HTML-структура
+**Файл:** `index.html`
 
 ```html
 <!DOCTYPE html>
@@ -151,625 +88,667 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Моя первая 3D игра</title>
+    <title>Урок 1: Модульная сцена</title>
+</head>
+<body>
+    <div id="info">
+        <h1>🚀 УРОК 1: Модульная сцена</h1>
+        <p>Сцена | Камера | Звёзды</p>
+    </div>
+    <div class="status">
+        ✅ Сцена загружается...
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    
+    <script type="module" src="./src/main.js"></script>
+</body>
+</html>
 ```
 
-<details>
-<summary><b>🤔 Что здесь происходит?</b></summary>
+**Что мы сделали:**
+- Создали HTML структуру
+- Добавили importmap (чтобы можно было писать `import * as THREE from 'three'`)
+- Подключили главный JS файл
 
-Это базовая HTML5 структура. Ключевой момент — `<meta name="viewport">`, который обеспечивает корректное отображение на мобильных устройствах. Тег `charset="UTF-8"` гарантирует поддержку русского языка.
+**Проверка:** Откройте index.html в браузере → пустая белая страница (пока нет ошибок 404 на main.js)
 
-</details>
+---
 
-```html
-    <style>
-        body {
-            margin: 0;              /* Убираем отступы браузера */
-            overflow: hidden;       /* Убираем полосы прокрутки */
-        }
-        canvas {
-            display: block;         /* Убираем отступы у canvas */
-        }
-    </style>
+## ШАГ 2: Создаём папки и пустые файлы
+
+Создайте такую структуру:
+
+```
+src/
+├── main.js
+├── config/
+│   ├── scene.js
+│   └── camera.js
+└── core/
+    ├── SceneManager.js
+    └── CameraManager.js
 ```
 
-<details>
-<summary><b>🎨 Почему эти стили важны?</b></summary>
+**Сейчас у всех файлов пустое содержимое.**
 
-- `margin: 0` — браузеры по умолчанию добавляют отступ 8px, который создал бы белую рамку вокруг нашей 3D-сцены
-- `overflow: hidden` — предотвращает появление прокрутки, если canvas выйдет за границы
-- `display: block` — canvas по умолчанию inline-элемент (как текст), что создаёт небольшой отступ снизу
+---
 
-</details>
+## ШАГ 3: Создаём конфиг сцены
 
-### 2. Импорт Three.js
+**Файл:** `src/config/scene.js`
+
+```javascript
+export const SCENE_CONFIG = {
+    background: 0x050518,
+    fog: {
+        enabled: true,
+        color: 0x050518,
+        density: 0.003
+    },
+    stars: {
+        count: 2000,
+        size: 0.15,
+        color: 0xffffff,
+        range: 400
+    }
+};
+```
+
+**Что мы сделали:** Описали цвет фона, туман и звёзды.
+
+---
+
+## ШАГ 4: Создаём конфиг камеры
+
+**Файл:** `src/config/camera.js`
+
+```javascript
+export const CAMERA_CONFIG = {
+    fov: 45,
+    near: 0.1,
+    far: 1000,
+    position: { x: 5, y: 4, z: 8 },
+    target: { x: 0, y: 0, z: 0 }
+};
+```
+
+**Что мы сделали:** Настроили камеру (угол обзора, позицию, дальность).
+
+---
+
+## ШАГ 5: Создаём SceneManager (только каркас)
+
+**Файл:** `src/core/SceneManager.js`
 
 ```javascript
 import * as THREE from 'three';
-```
+import { SCENE_CONFIG } from '../config/scene.js';
 
-<details>
-<summary><b>📦 Что такое import map?</b></summary>
-
-Мы используем современный способ подключения через `import map`. Это технология, позволяющая использовать короткие имена для импорта модулей прямо в браузере.
-
-```html
-<script type="importmap">
-{
-    "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+export class SceneManager {
+    constructor() {
+        this.scene = null;
+        this.stars = null;
+    }
+    
+    create() {
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(SCENE_CONFIG.background);
+        return this.scene;
+    }
+    
+    getScene() {
+        return this.scene;
+    }
+    
+    update(time) {
+        // Пока пусто
     }
 }
-</script>
 ```
 
-**Преимущества:**
-- Не нужно устанавливать Node.js или npm
-- Работает прямо в браузере
-- Всегда актуальная версия из CDN
-
-**Альтернативы:**
-- Можно скачать файлы локально
-- Можно использовать npm: `npm install three`
-- Можно использовать другие CDN (jsDelivr, cdnjs)
-
-</details>
-
-### 3. Создание сцены
-
-```javascript
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x1a1a2e);
-```
-
-<details>
-<summary><b>🎭 Сцена — это контейнер для всего</b></summary>
-
-Представь театральную постановку:
-- **Scene** = театральные подмостки
-- **Objects, Lights, Camera** = актёры, свет, декорации
-- **Renderer** = зритель в зале
-
-`new THREE.Color(0x1a1a2e)` — задаёт цвет в шестнадцатеричном формате:
-- `0x` — префикс для hex-чисел
-- `1a` — красный компонент (26 из 255)
-- `1a` — зелёный компонент (26 из 255)
-- `2e` — синий компонент (46 из 255)
-- Результат: тёмно-синий цвет (#1a1a2e)
-
-**Другие способы задать цвет:**
-```javascript
-// CSS-строка
-scene.background = new THREE.Color('rgb(26, 26, 46)');
-
-// Имя цвета
-scene.background = new THREE.Color('navy');
-
-// HSL
-scene.background = new THREE.Color().setHSL(0.66, 0.28, 0.14);
-```
-
-</details>
-
-### 4. Настройка камеры
-
-```javascript
-const camera = new THREE.PerspectiveCamera(
-    75,                                    // FOV - угол обзора
-    window.innerWidth / window.innerHeight, // Aspect ratio
-    0.1,                                   // Near plane
-    1000                                   // Far plane
-);
-camera.position.z = 5;
-```
-
-<details>
-<summary><b>📷 PerspectiveCamera — имитация человеческого зрения</b></summary>
-
-**Параметры перспективной камеры:**
-
-| Параметр | Значение | Описание | Визуализация |
-|----------|----------|----------|--------------|
-| **FOV** | 75° | Угол обзора по вертикали | 🔭 → 🔎 |
-| **Aspect** | авто | Отношение ширины к высоте | 16:9, 4:3, etc |
-| **Near** | 0.1 | Минимальное расстояние отрисовки | 10 см от глаз |
-| **Far** | 1000 | Максимальное расстояние отрисовки | 1 км |
-
-```
-        Камера
-         👁
-         /\
-        /  \
-       /    \
-      / FOV  \
-     /  75°   \
-    /__________\
-   Near     Far
-   0.1      1000
-```
-
-**FOV (Field of View):**
-- 60° — узкий обзор (бинокль)
-- 75° — естественный обзор (наш случай)
-- 100°+ — широкоугольный обзор (рыбий глаз)
-
-**Зачем нужны Near и Far?**
-Это оптимизация: объекты ближе 0.1 и дальше 1000 не будут отрисовываться. Это экономит ресурсы GPU.
-
-</details>
-
-### 5. Рендерер — холст для рисования
-
-```javascript
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
-document.body.appendChild(renderer.domElement);
-```
-
-<details>
-<summary><b>🎨 WebGLRenderer — магия под капотом</b></summary>
-
-**Что происходит при создании рендерера:**
-
-1. **WebGLRenderer** создаёт HTML5 Canvas элемент
-2. Настраивает WebGL контекст (2.0 если доступен)
-3. Компилирует шейдеры для GPU
-4. Готовит буферы для вершин и индексов
-
-**Важные настройки:**
-
-```javascript
-// Включаем сглаживание (красивые края)
-const renderer = new THREE.WebGLRenderer({ 
-    antialias: true,
-    alpha: true  // Прозрачный фон
-});
-
-// Устанавливаем размер
-renderer.setSize(window.innerWidth, window.innerHeight);
-
-// Включаем тени
-renderer.shadowMap.enabled = true;
-
-// Настройка точности теней
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-```
-
-**Почему важно обрабатывать ресайз окна:**
-
-```javascript
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
-```
-
-</details>
-
-### 6. Геометрия — скелет объекта
-
-```javascript
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-```
-
-<details>
-<summary><b>📐 BoxGeometry — математика куба</b></summary>
-
-**Что создаёт BoxGeometry:**
-- 8 вершин (углы куба)
-- 12 рёбер (линии между вершинами)
-- 6 граней (плоскости)
-- 24 UV-координаты (по 4 на грань для текстур)
-
-```
-   Вершины куба (x, y, z):
-   
-   (-0.5,  0.5,  0.5) ——— ( 0.5,  0.5,  0.5)
-        |\                    /|
-        | \                  / |
-        |  \                /  |
-        |   \              /   |
-        |    (-0.5, -0.5,  0.5) — (0.5, -0.5, 0.5)
-        |    |             |    |
-   (-0.5,  0.5, -0.5) ——— ( 0.5,  0.5, -0.5)
-         \   |             \   |
-          \  |              \  |
-           \ |               \ |
-            \|                \|
-        (-0.5, -0.5, -0.5) — (0.5, -0.5, -0.5)
-```
-
-**Другие базовые геометрии:**
-- `THREE.SphereGeometry(radius, widthSegments, heightSegments)`
-- `THREE.CylinderGeometry(radiusTop, radiusBottom, height, segments)`
-- `THREE.ConeGeometry(radius, height, segments)`
-- `THREE.TorusGeometry(radius, tube, radialSegments, tubularSegments)`
-
-</details>
-
-### 7. Материал — кожа объекта
-
-```javascript
-const material = new THREE.MeshStandardMaterial({ 
-    color: 0x00ff00,
-    roughness: 0.5,
-    metalness: 0.1
-});
-```
-
-<details>
-<summary><b>🎨 MeshStandardMaterial — физически корректный материал</b></summary>
-
-**PBR (Physically Based Rendering):**
-- Реалистичное поведение света
-- Основан на физических принципах
-- Используется в современных играх и фильмах
-
-**Параметры материала:**
-
-| Параметр | Диапазон | Описание |
-|----------|----------|----------|
-| **roughness** | 0-1 | 0 = зеркало, 1 = матовый пластик |
-| **metalness** | 0-1 | 0 = диэлектрик, 1 = металл |
-| **color** | hex | Базовый цвет |
-
-```
-Roughness визуализация:
-0.0: ✨━━━━━━ (идеальное отражение)
-0.2: 💎━━━━━━ (глянцевый)
-0.5: 🏓━━━━━━ (полуматовый) ← наш куб
-0.8: 🧱━━━━━━ (шероховатый)
-1.0: 📄━━━━━━ (полностью матовый)
-```
-
-**Другие типы материалов:**
-- `MeshBasicMaterial` — не реагирует на свет
-- `MeshLambertMaterial` — простое освещение (быстрее)
-- `MeshPhongMaterial` — блики и отражения
-- `MeshToonMaterial` — мультяшный стиль
-
-</details>
-
-### 8. Меш — объединение формы и внешности
-
-```javascript
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
-```
-
-<details>
-<summary><b>🎯 Mesh — это как объект в реальном мире</b></summary>
-
-В реальном мире: Статуя = Форма (мрамор) + Материал (текстура мрамора)
-В Three.js: Mesh = Geometry + Material
-
-**Трансформации меша:**
-```javascript
-// Позиция
-cube.position.x = 2;
-cube.position.y = 1;
-cube.position.z = -3;
-// Или одной строкой:
-cube.position.set(2, 1, -3);
-
-// Вращение (в радианах!)
-cube.rotation.x = Math.PI / 4;  // 45 градусов
-cube.rotation.y = 0.5;          // ~28.6 градусов
-
-// Масштаб
-cube.scale.x = 2;    // Растянуть по X в 2 раза
-cube.scale.set(1, 2, 1);  // Растянуть по Y в 2 раза
-```
-
-</details>
-
-### 9. Система освещения
-
-```javascript
-// Ambient Light — рассеянный свет
-const ambientLight = new THREE.AmbientLight(0x404040, 1);
-scene.add(ambientLight);
-
-// Directional Light — направленный свет
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(5, 5, 5);
-scene.add(directionalLight);
-```
-
-<details>
-<summary><b>💡 Типы освещения в Three.js</b></summary>
-
-**Типы источников света:**
-
-| Тип | Аналог в реальности | Особенности |
-|-----|---------------------|-------------|
-| **AmbientLight** | Общее освещение комнаты | Без теней, равномерный |
-| **DirectionalLight** | Солнце | Параллельные лучи |
-| **PointLight** | Лампочка | Свет во все стороны |
-| **SpotLight** | Фонарик | Конус света |
-
-```
-Визуализация:
-
-AmbientLight:         DirectionalLight:      PointLight:
-    ⭐                    ☀️                    💡
-   равномерно           лучи →             лучи во все
-   освещает всё        в одном             стороны
-                       направлении
-```
-
-**Почему нужны оба типа:**
-- Только AmbientLight → всё плоское, нет теней
-- Только DirectionalLight → тени абсолютно чёрные
-- Оба вместе → естественное освещение с мягкими тенями
-
-</details>
-
-### 10. Цикл анимации
-
-```javascript
-function animate() {
-    requestAnimationFrame(animate);
-    
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
-    
-    renderer.render(scene, camera);
-}
-animate();
-```
-
-<details>
-<summary><b>🔄 Игровой цикл — сердце анимации</b></summary>
-
-**Как это работает:**
-
-```
-Начало
-  ↓
-[requestAnimationFrame] ← Ожидание V-Sync монитора
-  ↓
-[Обновление логики]     ← Вращение, физика, AI
-  ↓
-[Рендеринг кадра]       ← Отрисовка на Canvas
-  ↓
-Возврат к началу
-```
-
-**Почему requestAnimationFrame, а не setInterval?**
-
-| Критерий | requestAnimationFrame | setInterval |
-|----------|----------------------|-------------|
-| **Частота** | 60 FPS (синхр. с экраном) | Заданная (может не совпадать) |
-| **При сворачивании** | Пауза | Продолжает работать |
-| **Энергопотребление** | Оптимальное | Высокое |
-| **Плавность** | Идеальная | Может дёргаться |
-
-**Правильный игровой цикл с дельтой времени:**
-
-```javascript
-const clock = new THREE.Clock();
-
-function animate() {
-    requestAnimationFrame(animate);
-    
-    const delta = clock.getDelta(); // Время с прошлого кадра
-    
-    // Скорость не зависит от FPS
-    cube.rotation.y += 2 * delta; // 2 радиана в секунду
-    
-    renderer.render(scene, camera);
-}
-```
-
-</details>
+**Что мы сделали:** 
+- Создали класс SceneManager
+- Научились создавать сцену с фоном
+- Пока без звёзд
+
+**Проверка:** Код пока не работает, т.к. нет main.js
 
 ---
 
-## 💡 Концептуальные основы
+## ШАГ 6: Создаём CameraManager
 
-### Система координат Three.js
+**Файл:** `src/core/CameraManager.js`
 
-```
-        Y (Вверх)
-        |
-        |
-        |
-        /‾‾‾‾‾‾‾ X (Вправо)
-       /
-      /
-     Z (На зрителя)
-```
-
-<details>
-<summary><b>📍 Правосторонняя система координат</b></summary>
-
-**Правило правой руки:**
-1. Вытяни правую руку
-2. Большой палец → X
-3. Указательный палец → Y
-4. Средний палец → Z
-
-**Важно:** Эта система отличается от:
-- CSS (Y вниз)
-- Unity (Y вверх, но Z наоборот)
-- Blender (Z вверх)
-
-**Конвертация из градусов в радианы:**
 ```javascript
-// Функция-помощник
-const degToRad = (degrees) => degrees * (Math.PI / 180);
+import * as THREE from 'three';
+import { CAMERA_CONFIG } from '../config/camera.js';
 
-cube.rotation.y = degToRad(90); // Поворот на 90°
+export class CameraManager {
+    constructor(rendererDomElement) {
+        this.camera = null;
+        this.rendererDomElement = rendererDomElement;
+    }
+
+    create() {
+        this.camera = new THREE.PerspectiveCamera(
+            CAMERA_CONFIG.fov,
+            window.innerWidth / window.innerHeight,
+            CAMERA_CONFIG.near,
+            CAMERA_CONFIG.far
+        );
+
+        this.camera.position.set(
+            CAMERA_CONFIG.position.x,
+            CAMERA_CONFIG.position.y,
+            CAMERA_CONFIG.position.z
+        );
+
+        this.camera.lookAt(
+            CAMERA_CONFIG.target.x,
+            CAMERA_CONFIG.target.y,
+            CAMERA_CONFIG.target.z
+        );
+        
+        return this.camera;
+    }
+
+    getCamera() {
+        return this.camera;
+    }
+
+    onWindowResize() {
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+    }
+}
 ```
 
-</details>
-
-### Как работает 3D-рендеринг?
-
-<details>
-<summary><b>🔬 Путь от трёхмерной сцены до пикселей на экране</b></summary>
-
-```
-3D Мир                 GPU Pipeline              Экран
-───────               ──────────────             ──────
-
-[Вершины]     →    Vertex Shader     →
-(x, y, z)          (3D → 2D)
-
-[Треугольники] →   Rasterizer        →
-(сетка)            (в пиксели)
-
-[Материалы]   →    Fragment Shader   →    [Pixel]
-(цвет, свет)       (цвет каждого        (RGB #00ff00)
-                    пикселя)
-```
-
-**Упрощённо:**
-1. Трёхмерные координаты преобразуются в 2D-координаты экрана
-2. Невидимые поверхности отсекаются
-3. Оставшиеся разбиваются на пиксели
-4. Для каждого пикселя рассчитывается цвет с учётом освещения
-
-Именно это Three.js делает за нас!
-
-</details>
-
-### Сравнение с реальным миром
-
-<details>
-<summary><b>🌍 Аналогии для лучшего понимания</b></summary>
-
-| 3D-термин | Аналог в фотографии | Аналог в театре |
-|-----------|---------------------|-----------------|
-| **Scene** | Студия | Сцена |
-| **Camera** | Фотоаппарат | Глаз зрителя |
-| **Geometry** | Каркас объекта | Форма декорации |
-| **Material** | Краска/текстура | Цвет/материал ткани |
-| **Mesh** | Готовый объект | Готовая декорация |
-| **Light** | Студийный свет | Софиты |
-| **Renderer** | Фотоплёнка | Зритель |
-| **Animation** | Видеосъёмка | Движение актёров |
-
-</details>
+**Что мы сделали:** 
+- Создали класс для управления камерой
+- Добавили метод для ресайза окна
 
 ---
 
-## ❓ Часто задаваемые вопросы
+## ШАГ 7: Создаём main.js (минимальная версия)
 
-<details>
-<summary><b>1. Куб не отображается / чёрный экран</b></summary>
-
-**Проверь:**
-- Консоль браузера (F12) на наличие ошибок
-- Подключение Three.js (должен загрузиться без ошибок)
-- Наличие освещения (без света объекты чёрные)
-- Позицию камеры (может быть внутри куба)
-- Порядок добавления объектов в сцену
-
-**Решение:**
-```javascript
-// Временный тестовый код
-console.log('Renderer:', renderer);
-console.log('Scene children:', scene.children.length);
-console.log('Cube position:', cube.position);
-```
-
-</details>
-
-<details>
-<summary><b>2. Почему вращение в радианах, а не градусах?</b></summary>
-
-**Кратко:** Радианы естественны для математики и программирования.
+**Файл:** `src/main.js`
 
 ```javascript
-// Полезная константа
-const RAD = Math.PI / 180;
+import * as THREE from 'three';
+import { SceneManager } from './core/SceneManager.js';
+import { CameraManager } from './core/CameraManager.js';
 
-// Использование
-mesh.rotation.y = 90 * RAD; // 90 градусов
-mesh.rotation.x = 45 * RAD; // 45 градусов
+class Game {
+    constructor() {
+        this.renderer = null;
+        this.sceneManager = null;
+        this.cameraManager = null;
+        this.init();
+    }
+
+    init() {
+        // 1. СОЗДАЁМ РЕНДЕРЕР
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(this.renderer.domElement);
+
+        // 2. СОЗДАЁМ СЦЕНУ
+        this.sceneManager = new SceneManager();
+        const scene = this.sceneManager.create();
+
+        // 3. СОЗДАЁМ КАМЕРУ
+        this.cameraManager = new CameraManager(this.renderer.domElement);
+        const camera = this.cameraManager.create();
+
+        // 4. РИСУЕМ ПЕРВЫЙ КАДР
+        this.renderer.render(scene, camera);
+
+        console.log('✅ Game: приложение инициализировано');
+    }
+}
+
+const game = new Game();
 ```
 
-**Связь радиан и градусов:**
-- 180° = π радиан (≈ 3.14159)
-- 360° = 2π радиан
-- 1 радиан ≈ 57.3°
+**Что мы сделали:**
+- Создали класс Game
+- Инициализировали рендерер
+- Создали сцену и камеру
+- Отрисовали первый кадр
 
-</details>
+**Проверка:** Откройте index.html в браузере → вы увидите **чёрный экран**. Это нормально! Сцена есть, но ничего не добавлено.
 
-<details>
-<summary><b>3. Можно ли использовать TypeScript?</b></summary>
+---
 
-Да! Three.js имеет отличную поддержку типов:
+## ШАГ 8: Добавляем анимационный цикл
+
+**Добавьте в файл `src/main.js` метод `animate`:**
+
+```javascript
+// Добавьте этот метод в класс Game
+animate() {
+    requestAnimationFrame(() => this.animate());
+    
+    this.renderer.render(
+        this.sceneManager.getScene(),
+        this.cameraManager.getCamera()
+    );
+}
+```
+
+**И в методе `init()` после создания камеры добавьте:**
+
+```javascript
+// После this.cameraManager.create()
+this.animate();
+```
+
+**Полный метод init теперь:**
+
+```javascript
+init() {
+    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(this.renderer.domElement);
+
+    this.sceneManager = new SceneManager();
+    const scene = this.sceneManager.create();
+
+    this.cameraManager = new CameraManager(this.renderer.domElement);
+    const camera = this.cameraManager.create();
+
+    this.animate();  // 👈 ЗАПУСКАЕМ АНИМАЦИЮ
+
+    console.log('✅ Game: приложение инициализировано');
+}
+```
+
+**Проверка:** Чёрный экран, но теперь консоль не выдаёт ошибок и анимационный цикл работает.
+
+---
+
+## ШАГ 9: Добавляем звёзды в SceneManager
+
+**Добавьте в `src/core/SceneManager.js` метод `_createStars`:**
+
+```javascript
+_createStars() {
+    const { count, size, color, range } = SCENE_CONFIG.stars;
+
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(count * 3);
+
+    for (let i = 0; i < count; i++) {
+        positions[i * 3] = (Math.random() - 0.5) * range;
+        positions[i * 3 + 1] = (Math.random() - 0.5) * range * 0.6;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * range * 0.5 - 50;
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    const material = new THREE.PointsMaterial({
+        color: color,
+        size: size,
+        transparent: true,
+        opacity: 0.8
+    });
+
+    this.stars = new THREE.Points(geometry, material);
+    this.scene.add(this.stars);
+}
+```
+
+**И в методе `create` перед `return this.scene` добавьте:**
+
+```javascript
+this._createStars();
+```
+
+**Теперь метод `create` выглядит так:**
+
+```javascript
+create() {
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(SCENE_CONFIG.background);
+
+    if (SCENE_CONFIG.fog.enabled) {
+        this.scene.fog = new THREE.FogExp2(
+            SCENE_CONFIG.fog.color,
+            SCENE_CONFIG.fog.density
+        );
+    }
+    
+    this._createStars();  // 👈 ДОБАВЛЕНО
+    
+    return this.scene;
+}
+```
+
+**Проверка:** Вы должны увидеть **множество белых звёзд** на тёмно-синем фоне! 🎉
+
+---
+
+## ШАГ 10: Добавляем мерцание звёзд
+
+**В `src/core/SceneManager.js` обновите метод `update`:**
+
+```javascript
+update(time) {
+    if (this.stars && this.stars.material) {
+        this.stars.material.opacity = 0.7 + Math.sin(time * 3) * 0.1;
+    }
+}
+```
+
+**В `src/main.js` добавьте переменную `time` и обновите `animate`:**
+
+```javascript
+// Добавьте в конструктор Game
+constructor() {
+    this.renderer = null;
+    this.sceneManager = null;
+    this.cameraManager = null;
+    this.time = 0;  // 👈 ДОБАВЛЕНО
+    this.init();
+}
+
+// Обновите метод animate
+animate() {
+    requestAnimationFrame(() => this.animate());
+    
+    this.time += 0.016;  // 👈 ДОБАВЛЕНО (примерно 1/60 секунды)
+    
+    this.sceneManager.update(this.time);  // 👈 ДОБАВЛЕНО
+    
+    this.renderer.render(
+        this.sceneManager.getScene(),
+        this.cameraManager.getCamera()
+    );
+}
+```
+
+**Проверка:** Звёзды теперь **мягко мерцают**!
+
+---
+
+## ШАГ 11: Добавляем управление камерой (OrbitControls)
+
+**В `src/core/CameraManager.js` добавьте в начало импорт:**
+
+```javascript
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+```
+
+**Добавьте метод `createControls`:**
+
+```javascript
+createControls() {
+    this.controls = new OrbitControls(this.camera, this.rendererDomElement);
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.05;
+    this.controls.enableZoom = true;
+    this.controls.enablePan = true;
+    this.controls.target.set(0, 0, 0);
+    
+    return this.controls;
+}
+```
+
+**Добавьте метод `update` (вызывается каждый кадр):**
+
+```javascript
+update() {
+    if (this.controls) {
+        this.controls.update();
+    }
+}
+```
+
+**В `src/main.js` в методе `init` после создания камеры добавьте:**
+
+```javascript
+this.cameraManager.createControls();
+```
+
+**И в методе `animate` добавьте:**
+
+```javascript
+this.cameraManager.update();
+```
+
+**Теперь `init` выглядит так:**
+
+```javascript
+init() {
+    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(this.renderer.domElement);
+
+    this.sceneManager = new SceneManager();
+    const scene = this.sceneManager.create();
+
+    this.cameraManager = new CameraManager(this.renderer.domElement);
+    const camera = this.cameraManager.create();
+    this.cameraManager.createControls();  // 👈 ДОБАВЛЕНО
+
+    this.animate();
+}
+```
+
+**А `animate` так:**
+
+```javascript
+animate() {
+    requestAnimationFrame(() => this.animate());
+    
+    this.time += 0.016;
+    
+    this.sceneManager.update(this.time);
+    this.cameraManager.update();  // 👈 ДОБАВЛЕНО
+    
+    this.renderer.render(
+        this.sceneManager.getScene(),
+        this.cameraManager.getCamera()
+    );
+}
+```
+
+**Проверка:** Теперь можно **вращать камеру мышью**! (зажмите левую кнопку и двигайте)
+
+---
+
+## ШАГ 12: Добавляем ресайз окна
+
+**В `src/main.js` в метод `init` добавьте:**
+
+```javascript
+window.addEventListener('resize', () => this.onWindowResize());
+```
+
+**И добавьте метод в класс Game:**
+
+```javascript
+onWindowResize() {
+    this.cameraManager.onWindowResize();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+}
+```
+
+**Проверка:** При изменении размера окна изображение подстраивается.
+
+---
+
+## ШАГ 13: Добавляем стили CSS
+
+**Файл:** `style.css`
+
+```css
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+
+#info {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    padding: 12px 20px;
+    border-radius: 10px;
+    border-left: 4px solid #ffaa44;
+    color: white;
+    pointer-events: none;
+    z-index: 100;
+}
+
+#info h1 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    color: #ffaa44;
+}
+
+#info p {
+    margin: 0;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.status {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 10px;
+    color: #4f4;
+    font-family: monospace;
+}
+```
+
+**В `index.html` добавьте подключение стилей в `<head>`:**
+
+```html
+<link rel="stylesheet" href="style.css">
+```
+
+---
+
+## ШАГ 14: Итоговые файлы для проверки
+
+### Структура проекта:
+
+```
+space-constructor/
+├── index.html
+├── style.css
+└── src/
+    ├── main.js
+    ├── config/
+    │   ├── scene.js
+    │   └── camera.js
+    └── core/
+        ├── SceneManager.js
+        └── CameraManager.js
+```
+
+### Полный код main.js:
+
+```javascript
+import * as THREE from 'three';
+import { SceneManager } from './core/SceneManager.js';
+import { CameraManager } from './core/CameraManager.js';
+
+class Game {
+    constructor() {
+        this.renderer = null;
+        this.sceneManager = null;
+        this.cameraManager = null;
+        this.time = 0;
+        this.init();
+    }
+
+    init() {
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(this.renderer.domElement);
+
+        this.sceneManager = new SceneManager();
+        const scene = this.sceneManager.create();
+
+        this.cameraManager = new CameraManager(this.renderer.domElement);
+        this.cameraManager.create();
+        this.cameraManager.createControls();
+
+        window.addEventListener('resize', () => this.onWindowResize());
+
+        this.animate();
+    }
+
+    onWindowResize() {
+        this.cameraManager.onWindowResize();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    animate() {
+        requestAnimationFrame(() => this.animate());
+
+        this.time += 0.016;
+
+        this.sceneManager.update(this.time);
+        this.cameraManager.update();
+
+        this.renderer.render(
+            this.sceneManager.getScene(),
+            this.cameraManager.getCamera()
+        );
+    }
+}
+
+const game = new Game();
+```
+
+---
+
+## Запуск проекта
 
 ```bash
-npm install three @types/three
-```
+# В терминале из папки проекта:
+npx serve
 
-```typescript
-import * as THREE from 'three';
+# Или
+python -m http.server 8000
 
-const scene: THREE.Scene = new THREE.Scene();
-const cube: THREE.Mesh = new THREE.Mesh(geometry, material);
-```
-
-</details>
-
----
-
-## 🎯 Задания для самостоятельной работы
-
-### Уровень 1: Базовый (обязательно)
-- [ ] Измени цвет куба на красный
-- [ ] Измени цвет фона на чёрный
-- [ ] Измени скорость вращения
-
-### Уровень 2: Средний (рекомендуется)
-- [ ] Добавь второй куб другого цвета и размера
-- [ ] Сделай один куб прозрачным
-- [ ] Добавь сферу и цилиндр на сцену
-- [ ] Поэкспериментируй с roughness и metalness
-
-### Уровень 3: Продвинутый (для энтузиастов)
-- [ ] Создай сетку из кубов (как пиксели)
-- [ ] Добавь управление камерой с клавиатуры
-- [ ] Реализуй анимацию, зависящую от времени
-- [ ] Добавь загрузку текстуры из файла
-
-**Код для второго куба:**
-```javascript
-const cube2 = new THREE.Mesh(
-    new THREE.BoxGeometry(0.5, 0.5, 0.5),
-    new THREE.MeshStandardMaterial({ color: 0xff0000 })
-);
-cube2.position.set(2, 1, 0);
-scene.add(cube2);
-
-// Не забудь вращать его в animate()!
-// cube2.rotation.x += 0.02;
+# Откройте в браузере: http://localhost:8000
 ```
 
 ---
 
-## 🚀 Что дальше?
+## Итог: что у вас получилось
 
-### Следующие уроки:
-
-<ol start="2">
-<li>**Управление камерой с мышью и клавиатурой**
-   <br/>Добавим OrbitControls и WASD-перемещение</li>
-<li>**Игровой мир: пол, стены, небо**
-   <br/>Создадим окружение для будущей игры</li>
-<li>**Физика и коллизии**
-   <br/>Добавим гравитацию и обнаружение столкновений</li>
-<li>**Освещение и тени**
-   <br/>Создадим реалистичную атмосферу</li>
-<li>**Игровая логика и интерактивность**
-   <br/>Превратим демо в настоящую мини-игру</li>
-</ol>
+| Шаг | Что добавили | Результат |
+|-----|--------------|-----------|
+| 1-4 | HTML + конфиги | Структура проекта |
+| 5-6 | SceneManager + CameraManager | Базовые классы |
+| 7 | Минимальный Game | Чёрный экран |
+| 8 | Анимационный цикл | Стабильная отрисовка |
+| 9 | Звёзды | ✨ Звёздное поле |
+| 10 | Мерцание | Пульсирующие звёзды |
+| 11 | OrbitControls | 🖱️ Вращение камеры мышью |
+| 12 | Resize | Адаптация к окну |
+| 13 | CSS | 🎨 Красивое UI |
 
 ---
 
