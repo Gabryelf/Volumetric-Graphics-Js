@@ -20,7 +20,7 @@
 </p>
 
 <!-- Разделитель -->
-![divider](https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif)
+![divider](https://github.com/Gabryelf/Atlas-Assets/raw/main/docs/animations/gifs-line/pulse-grey.gif)
 
 ![Версия](https://img.shields.io/badge/версия-0.0.1-brightgreen)
 ![js](https://img.shields.io/badge/javascript-yellow)
@@ -834,5 +834,5 @@ scene.add(cube2);
 
 </details>
 
-![divider](https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif)
+![divider](https://github.com/Gabryelf/Atlas-Assets/raw/main/docs/animations/gifs-line/pulse-grey.gif)
 
