@@ -813,114 +813,486 @@ const cube: THREE.Mesh = new THREE.Mesh(geometry, material);
 
 </div>
 
+<div align="center">
+
+# 🎮 Three.js 3D Game — Урок 2
+
+### Архитектура игры: Сцена и Игровой Цикл
+
+[![Three.js](https://img.shields.io/badge/Three.js-r160-black?logo=three.js&logoColor=white)](https://threejs.org/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?logo=javascript&logoColor=white)](https://www.javascript.com/)
+[![OOP](https://img.shields.io/badge/OOP-Classes-blueviolet)](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Classes)
+
+<img src="https://threejs.org/examples/screenshots/webgl_points_billboards.jpg" alt="Звездное небо Three.js" width="400"/>
+
+*От одиночного куба — к модульной архитектуре и звёздному небу*
+
+</div>
+
 ---
 
 # 🌟 Об уроке
+
+В прошлом уроке мы создали вращающийся куб. Теперь наш проект вырос, и смешивать весь код в одном файле — непрофессионально. Представь, что мы строим большой космический корабль. Нужно разделить его на отсеки: двигатель, рубка управления, топливный бак.
+
+То же самое мы сделаем с нашим кодом!
 
 ## 🎯 Что ты узнаешь
 
 После завершения этого урока ты будешь понимать:
 
-- ✅ Мы идем глубже и практикуем проектный Three.js
-- ✅ Мы собираемся разделить скрипт написанный ранее на части
-- ✅ Принципы работы в парадигме ООП
-- ✅ Как работают материалы, освещение и камеры на основе классов
-- ✅ Разбираем вспомогательные фичи Axis и Grid
-- ✅ Как работает Three.js - принцип взаимодействия компонентов.
+- ✅ ☕ **Работа с Node.js и npm** — установка Three.js как пакета.
+- ✅ 🗂 **Модульная архитектура** — разделение кода на логические части (менеджеры, конфиги).
+- ✅ 🏗 **Класс `Game`** — создание главного игрового цикла и точки входа в приложение.
+- ✅ 🎨 **`SceneManager`** — создание сцены, фона и эффекта тумана.
+- ✅ ✨ **Система частиц** — создание procedurally-generated звездного неба (2000 звезд!).
+- ✅ 🎭 **Принцип единой ответственности** — каждый класс занимается только своим делом.
 
 ---
 
 ## 📁 Структура проекта
 
+В этом уроке мы создадим фундамент, на котором будем строить игру дальше. Вот как будет выглядеть наш проект после завершения этапа:
+
 ```
-📦 threejs-first-steps/
+📦 your-project-folder/
  ┣ 📂 src/
- ┃ ┣ 📂 main.js          # основной скрипт запуска
- ┃ ┣ 📂 core/            # модуль важных классов
- ┃ ┣ 📂 config/          # конфигурации с константными значениями
- ┃ ┗ 📂 helpers/           # скрипты тесты и вспомогательные функции
- ┗ 📜 index.html           # Главный файл проекта
+ ┃ ┣ 📂 config/
+ ┃ ┃ ┗ 📜 scene.js          # Конфигурация сцены (цвет, туман, звезды)
+ ┃ ┣ 📂 core/
+ ┃ ┃ ┗ 📜 SceneManager.js   # Класс для управления сценой
+ ┃ ┗ 📜 main.js             # Главный файл, класс Game и цикл анимации
+ ┣ 📜 index.html            # HTML-файл с importmap
+ ┗ 📜 package.json          # Файл с зависимостями (создаст npm)
 ```
 
 ---
 
-## 🚀 Установка и запуск
+## 🚀 Установка и запуск (Новый, профессиональный способ)
 
-**Открой файл** в браузере:
-   - Скачай и инициализируй node. (сделаем и так позже)
-   - Или используй Live Server в VS Code (плагин для IDE)
-   - Или запусти локальный сервер: `npx http-server` (рекомендация для старта)
+В первом уроке мы подключали Three.js напрямую из сети (через CDN). Это быстро для старта, но для большого проекта лучше установить его локально через **npm (Node Package Manager)**.
 
----
+**1. Убедись, что установлен Node.js:**
+Открой терминал (командную строку) и введи:
+```bash
+node -v
+```
+Если видишь версию (например, `v18.x.x`), всё отлично. Если нет — скачай Node.js с [официального сайта](https://nodejs.org/).
 
-![Static Badge](https://img.shields.io/badge/ШАГ-1-white)
-![Static Badge](https://img.shields.io/badge/ВАЖНО-blueviolet)
+**2. Инициализируй проект:**
+Создай папку для проекта, открой её в терминале и выполни:
+```bash
+npm init -y
+```
+Эта команда создаст файл `package.json` — «паспорт» нашего проекта.
 
-> Мы будем в продолжении всех этапов строить
-> большой проект, как того требует 3D игра с мультиплеером на собственном сервере.
-> В таком случае, что бы нам было легче ориентироваться в коде и расширять уже
-> существующую логику стоит подумать о рабочем пространстве. Мы начнем с самого малого
-> и будем увеличивать проект по мере необходимости, но будем действовать профессионально.
+**3. Установи Three.js:**
+Выполни в терминале:
+```bash
+npm install three
+```
+Теперь Three.js будет лежать в папке `node_modules`, и мы сможем импортировать его из `main.js`, как обычный модуль.
 
----
-
-> Нужно создать главную папку (root catalog) - она может иметь любое название.
-> В ней создать (или скопировать в нее с прошлого урока) `index.html`. В корневом каталоге
-> создать папку `src`. Затем создать две папки (все последующие имена лучше задавать как у меня
-> для синхронизации и избегания частых ошибок с импортами) для модульной структуры - core, config
-
-<div align="center">
-  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-2.png" alt="Результат" />
-</div>
-
-> После создавайте файлы как на скриншоте. В итоге должно получиться следующее - есть главная папка проекта - у меня это `THREE-JS`, в ней `index.html` и папка `src` на одном уровне, в папке `src` скрипт `main.js` и две папки `core` и `config`. В папке `core` три файла - `SceneManager.js`, `CameraManager.js` и `LightManager.js`. В папке `config` - `scene.js`, `camera.js` и `light.js`.
-
-
+**4. Запуск:**
+Способ запуска не изменился — используй **Live Server** в VS Code или команду `npx http-server`.
 
 ---
 
+# 📝 Пошаговое объяснение кода
 
+Мы будем создавать файлы в том порядке, в котором они «оживают» в браузере. Начнём с главного входа — `index.html`, затем создадим главный класс `Game`, а потом — его помощников.
 
-### Результат
+## 1. `index.html` — Точка входа
 
-<div align="center">
-  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-2.png" alt="Результат" />
-</div>
+Это каркас нашего приложения. Главное отличие от прошлого урока — импорты `three` будут указывать на локальную папку `node_modules`, потому что мы установили пакет через npm.
 
----
+<details>
+<summary><b>📄 Код файла <code>index.html</code> (развернуть)</b></summary>
 
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Игра — Урок 2: Архитектура</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0,0,0,0.6);
+            padding: 8px 15px;
+            border-radius: 8px;
+            pointer-events: none;
+            z-index: 100;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        ✨ Модульная архитектура | Звездное поле | Игровой цикл
+    </div>
 
-## 📚 Ресурсы
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "./node_modules/three/build/three.module.js"
+            }
+        }
+    </script>
 
-### Официальная документация
-- [Three.js Документация](https://threejs.org/docs/)
-- [Three.js Примеры](https://threejs.org/examples/)
-- [WebGL Fundamentals](https://webglfundamentals.org/)
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>
+```
+</details>
 
-### Книги
-- "Three.js Cookbook" (Jos Dirksen)
-- "Learning Three.js" (Jos Dirksen)
-- "WebGL Programming Guide" (Kouichi Matsuda)
+<details>
+<summary><b>🤔 Что изменилось по сравнению с уроком 1?</b></summary>
 
-### Сообщества
-- [Three.js Discourse](https://discourse.threejs.org/)
-- [Three.js GitHub](https://github.com/mrdoob/three.js)
-- [Stack Overflow](https://stackoverflow.com/questions/tagged/three.js)
-
----
-
-<div align="center">
-
-От вращающегося куба до AAA-игры — долгий путь, но каждый шедевр начинается с первого шага.
-
----
-
-[⬆ К началу](#-threejs-3d-game--урок-2)
-
-</div>
-
+1. **`importmap` теперь указывает на локальную папку** `./node_modules/...`. Браузер будет брать Three.js с вашего компьютера, а не из Интернета. Это быстрее и надёжнее для разработки.
+2. Мы добавили простой `<div>` с информацией, чтобы видеть, что страница загрузилась.
+3. Основной скрипт `main.js` загружается как модуль (`type="module"`).
 
 </details>
+
+---
+
+## 2. `config/scene.js` — Конфигурация сцены
+
+«Выносим всё, что может измениться, в конфиги». Это золотое правило профессионала. Если мы захотим изменить цвет неба или количество звезд, мы не будем лезть в сложный код — просто откроем этот файл.
+
+<div align="center">
+  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-3.png" alt="Файл конфигурации сцены" width="600"/>
+  <br>
+  <sub>Файл, где живут все настройки сцены</sub>
+</div>
+
+<details>
+<summary><b>📄 Код файла <code>src/config/scene.js</code></b></summary>
+
+```javascript
+/**
+ * КОНФИГ СЦЕНЫ
+ * Все настройки сцены в одном месте
+ */
+
+export const SCENE_CONFIG = {
+    // Цвет фона (космос) - используем HEX формат
+    // 0x050518 - это тёмно-синий, почти ночное небо
+    background: 0x050518,
+    
+    // Настройки тумана (создаёт эффект глубины и скрывает дальние объекты)
+    fog: {
+        enabled: true,          // Включаем туман
+        color: 0x050518,       // Цвет тумана (должен совпадать с фоном для плавности)
+        density: 0.003         // Плотность: 0.001 = лёгкая дымка, 0.01 = густой молоко
+    },
+    
+    // Настройки звёздного поля (эффект "Космос")
+    stars: {
+        count: 2000,           // Количество звёзд (чем больше, тем красивее, но чуть тяжелее)
+        size: 0.15,            // Размер каждой звезды в юнитах
+        color: 0xffffff,       // Белый цвет (можно сделать 0xffaa66 для тёплых звёзд)
+        range: 400             // Разброс звёзд в пространстве (от -200 до +200 по всем осям)
+    }
+};
+```
+</details>
+
+<details>
+<summary><b>🎨 Анатомия конфига: что мы настраиваем</b></summary>
+
+*   **`background`**: Этот цвет зальёт весь холст. Важно: если у вас есть туман, цвет фона и тумана должны совпадать, чтобы переход был незаметным.
+*   **`fog.enabled`**: Туман — это не просто красивый эффект. Он ещё и **оптимизация**! Объекты, скрытые в тумане, Three.js не отрисовывает (или отрисовывает не полностью).
+*   **`stars`**: Мы создадим целое поле из 2000 звезд. Каждая звезда — это всего одна точка в 3D-пространстве. Отрисовка 2000 точек — очень лёгкая задача для компьютера, а выглядит потрясающе.
+
+</details>
+
+---
+
+## 3. `core/SceneManager.js` — Управляющий сценой
+
+Это наш первый «Менеджер». Слово «Manager» в названии класса означает, что он отвечает за создание, настройку и обновление какого-то одного компонента игры. `SceneManager` знает, как создать сцену, добавить туман и звезды, и может обновлять состояние звезд (например, заставить их мерцать).
+
+<div align="center">
+  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-4.png" alt="Код SceneManager" width="600"/>
+  <br>
+  <sub>Класс-менеджер: он создает и хранит сцену</sub>
+</div>
+
+<details>
+<summary><b>📄 Код файла <code>src/core/SceneManager.js</code></b></summary>
+
+```javascript
+import * as THREE from 'three';
+import { SCENE_CONFIG } from '../config/scene.js';
+ 
+export class SceneManager {
+    constructor() {
+        this.scene = null;   // Здесь будет храниться созданная сцена
+        this.stars = null;   // Здесь будет храниться наше звездное поле
+    }
+    
+    // Главный метод: создает и возвращает сцену
+    create() {    
+        // 1. СОЗДАЁМ СЦЕНУ
+        this.scene = new THREE.Scene();
+        
+        // 2. НАСТРАИВАЕМ ФОН
+        this.scene.background = new THREE.Color(SCENE_CONFIG.background);
+
+        // 3. ДОБАВЛЯЕМ ТУМАН (если включён в конфиге)
+        if (SCENE_CONFIG.fog.enabled) {
+            this.scene.fog = new THREE.FogExp2(
+                SCENE_CONFIG.fog.color,   // цвет тумана
+                SCENE_CONFIG.fog.density  // плотность
+            );
+        }    
+        
+        // 4. СОЗДАЁМ ЗВЁЗДНОЕ НЕБО (вызов private-метода)
+        this._createStars();
+        
+        // 5. ВОЗВРАЩАЕМ ГОТОВУЮ СЦЕНУ ДЛЯ ИСПОЛЬЗОВАНИЯ В ДРУГИХ КЛАССАХ
+        return this.scene;
+    }
+
+    // Приватный метод (начинается с _) — он для внутреннего использования
+    _createStars() {
+        // Достаём настройки звезд из конфига
+        const { count, size, color, range } = SCENE_CONFIG.stars;
+        
+        // Создаём «пустую» геометрию для точек
+        const geometry = new THREE.BufferGeometry();
+        
+        // Массив, где будут лежать координаты x, y, z для КАЖДОЙ звезды
+        const positions = [];
+        
+        // Генерируем случайные позиции для всех звезд
+        for (let i = 0; i < count; i++) {
+            // x, y, z в диапазоне от -range/2 до +range/2
+            positions.push((Math.random() - 0.5) * range); // X
+            positions.push((Math.random() - 0.5) * range); // Y
+            positions.push((Math.random() - 0.5) * range); // Z
+        }
+        
+        // Превращаем массив в атрибут WebGL
+        geometry.setAttribute('position', 
+            new THREE.BufferAttribute(new Float32Array(positions), 3));
+        
+        // Создаём материал для точек
+        const material = new THREE.PointsMaterial({
+            color: color,           // цвет звезд
+            size: size,             // размер каждой точки
+            transparent: true,      // разрешаем прозрачность
+            opacity: 0.8            // начальная прозрачность 80%
+        });
+        
+        // Создаём объект "Точки" (Points) и добавляем его в сцену
+        this.stars = new THREE.Points(geometry, material);
+        this.scene.add(this.stars);
+    }
+ 
+    // Геттер для получения сцены извне
+    getScene() {
+        return this.scene;
+    }
+ 
+    // Метод, который будет вызываться каждый кадр (из игрового цикла)
+    update() {
+        // Эффект мерцания: случайным образом меняем прозрачность звезд
+        if (this.stars && this.stars.material) {
+            // opacity будет от 0.2 до 0.9
+            this.stars.material.opacity = 0.3 + Math.random() * 0.6;
+        }
+    }
+}
+```
+</details>
+
+<details>
+<summary><b>🧠 Разбор ключевых концепций SceneManager</b></summary>
+
+*   **`THREE.BufferGeometry`**: Это очень эффективный способ хранить данные вершин (точек) в памяти. Мы говорим: «Вот тебе плоский массив чисел: x1, y1, z1, x2, y2, z2... нарисуй точки в этих местах». Для 2000 звезд это идеально.
+*   **`THREE.Points` и `PointsMaterial`**: Специальные объекты в Three.js для рисования множества точек (систем частиц). Они очень производительные.
+*   **Приватный метод `_createStars()`**: Мы не хотим, чтобы кто-то извне мог случайно пересоздать звезды. Поэтому метод начинается с `_` — это договорённость среди разработчиков, что метод «приватный» и его не стоит трогать.
+*   **Метод `update()`**: Сейчас здесь просто мерцание. Но в будущем здесь может быть, например, анимация туманностей или пролетающих метеоритов.
+
+</details>
+
+---
+
+## 4. `main.js` — Сердце игры (Класс `Game` и игровой цикл)
+
+Это главный дирижёр нашего оркестра. Класс `Game` создаёт все менеджеры, связывает их вместе и запускает бесконечный цикл анимации.
+
+<div align="center">
+  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-5.png" alt="Код main.js" width="600"/>
+  <br>
+  <sub>Главный цикл игры: инициализация и бесконечная анимация</sub>
+</div>
+
+<details>
+<summary><b>📄 Код файла <code>src/main.js</code> (первая часть — только СЦЕНА)</b></summary>
+
+```javascript
+import * as THREE from 'three';
+import { SceneManager } from './core/SceneManager.js';
+// Пока мы создали только SceneManager. CameraManager и LightManager появится в следующих уроках.
+// import { CameraManager } from './core/CameraManager.js';
+// import { LightManager } from './core/LightManager.js';
+
+class Game {
+    constructor() {
+        // Свойства класса
+        this.renderer = null;        // WebGL рендерер
+        this.sceneManager = null;    // Менеджер сцены
+        // this.cameraManager = null; // Будет в Уроке 3
+        // this.lightManager = null;  // Будет в Уроке 4
+
+        // Запускаем инициализацию
+        this.init();
+    }
+
+    init() {
+        // 1. СОЗДАЁМ РЕНДЕРЕР
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.shadowMap.enabled = true; // Включаем тени (пригодятся позже)
+        this.renderer.setPixelRatio(window.devicePixelRatio); // Для чёткости на retina-экранах
+        document.body.appendChild(this.renderer.domElement);
+
+        // 2. СОЗДАЁМ СЦЕНУ через SceneManager
+        this.sceneManager = new SceneManager();
+        const scene = this.sceneManager.create(); // Получаем готовую сцену
+        // Сейчас у нас есть сцена с ЗВЁЗДАМИ и ТУМАНОМ!
+
+        // 3. (ПОКА ЗАГЛУШКА) КАМЕРА И СВЕТ БУДУТ В СЛЕДУЮЩИХ УРОКАХ
+        // Поэтому для теста добавим "заглушку" — обычную камеру и свет прямо здесь.
+        console.warn('CameraManager и LightManager будут в Уроках 3 и 4. Пока использую временную камеру и свет.');
+        
+        // ВРЕМЕННАЯ КАМЕРА
+        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.camera.position.set(5, 4, 8);
+        this.camera.lookAt(0, 0, 0);
+        
+        // ВРЕМЕННЫЙ СВЕТ
+        const ambientLight = new THREE.AmbientLight(0x404060);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+        dirLight.position.set(5, 10, 7);
+        scene.add(ambientLight);
+        scene.add(dirLight);
+        
+        // Добавим небольшой тестовый куб, чтобы было видно, что 3D-мир работает
+        const testCubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+        const testCubeMaterial = new THREE.MeshStandardMaterial({ color: 0x44aa88, metalness: 0.6 });
+        const testCube = new THREE.Mesh(testCubeGeometry, testCubeMaterial);
+        testCube.castShadow = true;
+        testCube.receiveShadow = false;
+        scene.add(testCube);
+        this.testCube = testCube; // Сохраняем, чтобы вращать в animate
+
+        // 4. НАСТРАИВАЕМ ОБРАБОТЧИК РЕСАЙЗА ОКНА
+        window.addEventListener('resize', () => this.onWindowResize());
+
+        // 5. ЗАПУСКАЕМ ЦИКЛ АНИМАЦИИ
+        this.animate();
+    }
+
+    onWindowResize() {
+        // Обновляем камеру (пока временную)
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    animate() {
+        // Рекурсивный вызов анимации
+        requestAnimationFrame(() => this.animate());
+
+        // 1. ОБНОВЛЯЕМ ЛОГИКУ МЕНЕДЖЕРОВ
+        this.sceneManager.update(); // Звезды мерцают!
+        
+        // Временно вращаем кубик, чтобы проверить анимацию
+        if (this.testCube) {
+            this.testCube.rotation.x += 0.005;
+            this.testCube.rotation.y += 0.01;
+        }
+
+        // 2. РЕНДЕРИМ СЦЕНУ
+        this.renderer.render(this.sceneManager.getScene(), this.camera);
+    }
+}
+
+// === ЗАПУСК ИГРЫ ===
+const game = new Game();
+```
+</details>
+
+<details>
+<summary><b>🎬 Что происходит в <code>main.js</code>?</b></summary>
+
+1.  **Конструктор `Game()`:** Создаётся объект игры. Сразу вызывается метод `init()`.
+2.  **`init()`:** Это «режиссёрская» сцена.
+    *   Создаётся `WebGLRenderer` — наш «художник».
+    *   Создаётся `SceneManager`, и тот возвращает нам готовую сцену с туманом и звездами.
+    *   *Пока, в качестве заглушки*, мы создаём камеру и свет прямо в `main.js`. В следующем уроке их место будет в `CameraManager` и `LightManager`.
+    *   Добавляем тестовый кубик, чтобы было что анимировать.
+    *   Регистрируем обработчик изменения размера окна.
+    *   Запускаем `animate()`.
+3.  **`animate()`:** **Игровой цикл**. Он выполняется 60 раз в секунду.
+    *   Вызывает `update()` у менеджеров (звезды начинают мерцать).
+    *   Вращает кубик.
+    *   Говорит рендереру: «Нарисуй сцену с этой камеры!».
+4.  **`const game = new Game();`** — Создаём экземпляр игры и тем самым запускаем весь процесс.
+
+</details>
+
+---
+
+<div align="center">
+  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-6.png" alt="Результат урока 2" width="600"/>
+  <br>
+  <sub><strong>Результат:</strong> Звездное небо, мерцающие звезды, туман и вращающийся тестовый куб — всё работает отлично!</sub>
+</div>
+
+---
+
+## 🎉 Итоги Урока 2
+
+Поздравляю! Мы проделали огромную работу. Теперь наш проект не просто «куб на экране», а **профессиональная архитектура**, готовая к расширению.
+
+**Что мы сделали:**
+1.  Установили Three.js через **npm**, перейдя на локальную разработку.
+2.  Создали **модульную структуру** проекта (папки `core`, `config`).
+3.  Написали **класс `Game`**, который управляет всеми частями игры.
+4.  Реализовали **`SceneManager`**, который отвечает за создание сцены, тумана и огромного звездного поля.
+5.  Настроили **бесконечный игровой цикл** с мерцанием звезд и вращением куба.
+
+**Что дальше?**
+В следующем уроке (Урок 3) мы создадим `CameraManager` и `camera.js`, чтобы вынести камеру и управление (OrbitControls) в отдельный модуль. В Уроке 4 создадим `LightManager` и `light.js` с крутой системой динамического освещения, включая контровый свет, который будет мягко пульсировать.
+
+Ты на верном пути к созданию собственной 3D-игры! 🚀
+
+---
+
+<div align="center">
+
+Код становится чище, а возможности — шире. Учимся мыслить структурно!
+
+---
+
+[⬆ К началу урока 2](#-threejs-3d-game--урок-2)
+
+</div>
 
 ![divider](https://github.com/Gabryelf/Atlas-Assets/raw/main/docs/animations/gifs-line/pulse-grey.gif)
 
