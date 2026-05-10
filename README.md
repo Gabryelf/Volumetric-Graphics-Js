@@ -132,10 +132,6 @@
 
 ```
 📦 threejs-first-steps/
- ┣ 📂 assets/              # Папка для будущих ресурсов
- ┃ ┣ 📂 textures/         # Текстуры
- ┃ ┣ 📂 models/           # 3D-модели
- ┃ ┗ 📂 sounds/           # Звуки
  ┣ 📜 index.html           # Главный файл проекта
  ┣ 📜 README.md            # Документация (этот файл)
  ┗ 📜 .gitignore           # Игнорируемые Git файлы
@@ -223,13 +219,15 @@ import * as THREE from 'three';
 Мы используем современный способ подключения через `import map`. Это технология, позволяющая использовать короткие имена для импорта модулей прямо в браузере.
 
 ```html
-<script type="importmap">
-{
-    "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
-    }
-}
-</script>
+<!-- Import Map: говорит браузеру, где искать модули -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
 ```
 
 **Преимущества:**
@@ -324,10 +322,15 @@ camera.position.z = 5;
 
 **Зачем нужны Near и Far?**
 Это оптимизация: объекты ближе 0.1 и дальше 1000 не будут отрисовываться. Это экономит ресурсы GPU.
+Меньше 0.1 - near можно задать, но не стоит, это сказывается на обработке и тоже самое с far - более 
+1000 можно задать спокойно, но если много объектов и большая сцена не стоит!
 
 </details>
 
 ### 5. Рендерер — холст для рисования
+**Это как будто наш художник** 
+Исполнитель видимости камеры - все что в нее попадает он отрисует
+в окне нашего браузера по ширине и высоте которую мы укажем в аргументах seSize() метода
 
 ```javascript
 const renderer = new THREE.WebGLRenderer();
@@ -335,6 +338,9 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 ```
+
+**С помощью метода javascript appendChild() мы устанавливаем рендер как компонент 
+на наше окно браузера через обращение к документу, то бишь к HTML файлу** 
 
 <details>
 <summary><b>🎨 WebGLRenderer — магия под капотом</b></summary>
@@ -799,6 +805,150 @@ scene.add(cube2);
 <li>**Игровая логика и интерактивность**
    <br/>Превратим демо в настоящую мини-игру</li>
 </ol>
+
+---
+
+## 📚 Ресурсы
+
+### Официальная документация
+- [Three.js Документация](https://threejs.org/docs/)
+- [Three.js Примеры](https://threejs.org/examples/)
+- [WebGL Fundamentals](https://webglfundamentals.org/)
+
+### Книги
+- "Three.js Cookbook" (Jos Dirksen)
+- "Learning Three.js" (Jos Dirksen)
+- "WebGL Programming Guide" (Kouichi Matsuda)
+
+### Сообщества
+- [Three.js Discourse](https://discourse.threejs.org/)
+- [Three.js GitHub](https://github.com/mrdoob/three.js)
+- [Stack Overflow](https://stackoverflow.com/questions/tagged/three.js)
+
+---
+
+<div align="center">
+
+От вращающегося куба до AAA-игры — долгий путь, но каждый шедевр начинается с первого шага.
+
+---
+
+[⬆ К началу](#-threejs-3d-game--урок-1)
+
+</div>
+
+
+</details>
+
+![divider](https://github.com/Gabryelf/Atlas-Assets/raw/main/docs/animations/gifs-line/pulse-grey.gif)
+
+
+
+![Версия](https://img.shields.io/badge/версия-0.0.1-brightgreen)
+![js](https://img.shields.io/badge/javascript-yellow)
+![canvas](https://img.shields.io/badge/canvas-API-cyan)
+<details> <summary><strong>📁 Урок 1: Фундамент для будущей игры </strong></summary>
+
+
+<div align="center">
+
+# 🎮 Three.js 3D Game — Урок 2
+
+### Формируем рабочую зону
+
+[![Three.js](https://img.shields.io/badge/Three.js-r160-black?logo=three.js&logoColor=white)](https://threejs.org/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?logo=javascript&logoColor=white)](https://www.javascript.com/)
+[![HTML5](https://img.shields.io/badge/HTML5-Canvas-orange?logo=html5&logoColor=white)](https://developer.mozilla.org/ru/docs/Web/HTML)
+
+<img src=" " alt="Three.js Cube" width="400"/>
+
+* Проект - это каталог с модулями которые разделяются логически*
+
+</div>
+
+---
+
+# 🌟 Об уроке
+
+## 🎯 Что ты узнаешь
+
+После завершения этого урока ты будешь понимать:
+
+- ✅ Мы идем глубже и практикуем проектный Three.js
+- ✅ Мы собираемся разделить скрипт написанный ранее на части
+- ✅ Принципы работы в парадигме ООП
+- ✅ Как работают материалы, освещение и камеры на основе классов
+- ✅ Разбираем вспомогательные фичи Axis и Grid
+- ✅ Как работает Three.js - принцип взаимодействия компонентов.
+
+---
+
+## 📁 Структура проекта
+
+```
+📦 threejs-first-steps/
+ ┣ 📂 src/
+ ┃ ┣ 📂 main.js          # основной скрипт запуска
+ ┃ ┣ 📂 core/            # модуль важных классов
+ ┃ ┣ 📂 config/          # конфигурации с константными значениями
+ ┃ ┗ 📂 helpers/           # скрипты тесты и вспомогательные функции
+ ┗ 📜 index.html           # Главный файл проекта
+```
+
+---
+
+## 🚀 Установка и запуск
+
+**Открой файл** в браузере:
+   - Скачай и инициализируй node. (сделаем и так позже)
+   - Или используй Live Server в VS Code (плагин для IDE)
+   - Или запусти локальный сервер: `npx http-server` (рекомендация для старта)
+
+
+---
+
+
+> [!TIP]
+> Шаг № 1
+> 💡 ** **: 
+
+---
+
+
+
+
+
+---
+
+
+
+### Результат
+
+<div align="center">
+  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen1.png" alt="Результат" />
+</div>
+
+---
+
+
+## 🎯 Задания для самостоятельной работы
+
+### Уровень 1: Базовый (обязательно)
+- [ ] Измени цвет куба на красный
+- [ ] Измени цвет фона на чёрный
+- [ ] Измени скорость вращения
+
+### Уровень 2: Средний (рекомендуется)
+- [ ] Добавь второй куб другого цвета и размера
+- [ ] Сделай один куб прозрачным
+- [ ] Добавь сферу и цилиндр на сцену
+- [ ] Поэкспериментируй с roughness и metalness
+
+### Уровень 3: Продвинутый (для энтузиастов)
+- [ ] Создай сетку из кубов (как пиксели)
+- [ ] Добавь управление камерой с клавиатуры
+- [ ] Реализуй анимацию, зависящую от времени
+- [ ] Добавь загрузку текстуры из файла
 
 ---
 
