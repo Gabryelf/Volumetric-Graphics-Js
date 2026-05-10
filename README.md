@@ -791,7 +791,7 @@ const cube: THREE.Mesh = new THREE.Mesh(geometry, material);
 
 
 
-![Версия](https://img.shields.io/badge/версия-0.0.1-brightgreen)
+![Версия](https://img.shields.io/badge/версия-0.0.2-brightgreen)
 ![js](https://img.shields.io/badge/javascript-yellow)
 ![canvas](https://img.shields.io/badge/canvas-API-cyan)
 <details> <summary><strong>📁 Этап 2: Фундамент для будущей игры </strong></summary>
@@ -955,7 +955,7 @@ npm install three
 «Выносим всё, что может измениться, в конфиги». Это золотое правило профессионала. Если мы захотим изменить цвет неба или количество звезд, мы не будем лезть в сложный код — просто откроем этот файл.
 
 <div align="center">
-  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-3.png" alt="Файл конфигурации сцены" width="600"/>
+  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-7.png" alt="Файл конфигурации сцены" width="600"/>
   <br>
   <sub>Файл, где живут все настройки сцены</sub>
 </div>
@@ -1278,5 +1278,478 @@ const game = new Game();
 
 </div>
 
+</details>
+
 ![divider](https://github.com/Gabryelf/Atlas-Assets/raw/main/docs/animations/gifs-line/pulse-grey.gif)
+
+
+![Версия](https://img.shields.io/badge/версия-0.0.3-brightgreen)
+![js](https://img.shields.io/badge/javascript-yellow)
+![css-3](https://img.shields.io/badge/3-D-blue)
+![html-5](https://img.shields.io/badge/html-5-orange)
+
+
+<details> <summary><strong>📁 Этап 3: Камера и управление </strong></summary>
+
+
+<div align="center">
+
+# 🎮 Three.js 3D Game — Урок 3
+
+### Камера и Управление: Глазами игрока
+
+[![Three.js](https://img.shields.io/badge/Three.js-r160-black?logo=three.js&logoColor=white)](https://threejs.org/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?logo=javascript&logoColor=white)](https://www.javascript.com/)
+[![OrbitControls](https://img.shields.io/badge/OrbitControls-3D%20Navigation-blueviolet)](https://threejs.org/docs/#examples/en/controls/OrbitControls)
+
+<img src="https://threejs.org/examples/screenshots/webgl_controls_orbit.jpg" alt="OrbitControls Three.js" width="400"/>
+
+*Камера — это глаза игрока. Научимся управлять взглядом.*
+
+</div>
+
+---
+
+# 🌟 Об уроке
+
+В прошлом уроке мы создали архитектуру проекта, `SceneManager` и звёздное небо. Но камера у нас была **временной заглушкой** — она просто висела в воздухе, и её нельзя было двигать.
+
+Представь, что ты снимаешь кино. Можно поставить камеру на штатив... а можно взять в руки и двигать, приближать, рассматривать детали. OrbitControls — это твои "руки" в 3D-мире.
+
+## 🎯 Что ты узнаешь
+
+После завершения этого урока ты будешь понимать:
+
+- ✅ 📷 **`CameraManager`** — создание класса для управления камерой.
+- ✅ 🎮 **OrbitControls** — подключение и настройка интерактивного управления.
+- ✅ 🎛 **Конфигурация камеры** — вынесение всех параметров в отдельный файл.
+- ✅ 🔄 **Интеграция с игровым циклом** — подключение `CameraManager` к классу `Game`.
+- ✅ 🖱 **Обработка ресайза окна** — корректное обновление пропорций камеры.
+
+---
+
+## 📁 Структура проекта (обновлённая)
+
+После этого урока наша структура пополнится новыми файлами:
+
+```
+📦 your-project-folder/
+ ┣ 📂 src/
+ ┃ ┣ 📂 config/
+ ┃ ┃ ┣ 📜 scene.js          # (из Урока 2)
+ ┃ ┃ ┗ 📜 camera.js         # НОВЫЙ ФАЙЛ! Конфиг камеры
+ ┃ ┣ 📂 core/
+ ┃ ┃ ┣ 📜 SceneManager.js   # (из Урока 2)
+ ┃ ┃ ┗ 📜 CameraManager.js  # НОВЫЙ ФАЙЛ! Управление камерой
+ ┃ ┗ 📜 main.js             # ОБНОВЛЯЕТСЯ: убираем временную камеру
+ ┣ 📜 index.html
+ ┗ 📜 package.json
+```
+
+---
+
+## 📝 Пошаговое объяснение кода
+
+Мы будем двигаться от "кирпичиков" к "зданию": сначала создадим конфиг, затем класс-менеджер, и наконец подключим всё в `main.js`.
+
+## 1. `config/camera.js` — Конфигурация камеры
+
+Сначала вынесем **все** параметры камеры в конфиг. Это позволит нам менять угол обзора, позицию, чувствительность управления, не залезая в сложную логику `CameraManager`.
+
+<div align="center">
+  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-7.png" alt="Файл конфигурации камеры" width="600"/>
+  <br>
+  <sub>Все настройки камеры и управления в одном месте</sub>
+</div>
+
+<details>
+<summary><b>📄 Код файла <code>src/config/camera.js</code></b></summary>
+
+```javascript
+/**
+ * КОНФИГ КАМЕРЫ
+ * Все параметры камеры и управления вынесены в конфиг
+ */
+
+export const CAMERA_CONFIG = {
+    // === ПАРАМЕТРЫ КАМЕРЫ (PerspectiveCamera) ===
+    fov: 45,        // Field of View (угол обзора) в градусах
+                    // 45° — угол как у глаза человека
+                    // Меньше (20-30) — телескоп (зум)
+                    // Больше (75-90) — широкий угол (рыбий глаз)
+    
+    // Соотношение сторон будет вычисляться динамически!
+    // Мы будем передавать window.innerWidth / window.innerHeight
+    
+    near: 0.1,      // Ближняя плоскость отсечения
+                    // Объекты ближе 0.1 юнитов к камере НЕ видны
+                    // Нужно, чтобы камера не "залезала" внутрь объектов
+    
+    far: 1000,      // Дальняя плоскость отсечения
+                    // Объекты дальше 1000 юнитов НЕ видны
+                    // Экономит ресурсы — далеко не рисуем
+    
+    // === ПОЗИЦИЯ КАМЕРЫ В ПРОСТРАНСТВЕ ===
+    position: {
+        x: 5,       // Смещение вправо (положительное)
+        y: 4,       // Высота (положительное = выше)
+        z: 8        // Расстояние от центра (положительное = дальше)
+    },
+    
+    // === ТОЧКА, НА КОТОРУЮ СМОТРИТ КАМЕРА ===
+    target: {
+        x: 0,       // Центр сцены по X
+        y: 0,       // Центр сцены по Y
+        z: 0        // Центр сцены по Z (начало координат)
+    },
+    
+    // === НАСТРОЙКИ УПРАВЛЕНИЯ (OrbitControls) ===
+    controls: {
+        enableDamping: true,    // Плавность движения (инерция)
+        dampingFactor: 0.05,    // Сила инерции (0 = нет инерции, 1 = очень много)
+        autoRotate: false,      // Автоматическое вращение камеры (пока выключим)
+        autoRotateSpeed: 1.0,   // Скорость автовращения (если включить)
+        enableZoom: true,       // Разрешить приближение/отдаление
+        enablePan: true,        // Разрешить панорамирование (движение камеры в стороны)
+        zoomSpeed: 1.2,         // Скорость зума (чем выше, тем быстрее)
+        rotateSpeed: 1.0        // Скорость вращения камеры
+    }
+};
+```
+</details>
+
+<details>
+<summary><b>🎨 Почему именно такие значения?</b></summary>
+
+| Параметр | Значение | Почему |
+|----------|----------|--------|
+| **fov: 45** | 45° | Золотая середина. Не искажает объекты по краям, но даёт хороший обзор. |
+| **near: 0.1, far: 1000** | 0.1 / 1000 | Оптимальный диапазон для сцены размером 10x10x10. Ничего не "отрезает". |
+| **position: (5,4,8)** | Вдали и сверху | Классический "изометрический" угол. Хорошо виден куб и пространство вокруг. |
+| **dampingFactor: 0.05** | 0.05 | Лёгкая инерция. Камера не останавливается мгновенно, а плавно "доезжает". |
+| **zoomSpeed: 1.2** | 1.2 | Чуть выше стандартной (1.0) — зум отзывчивый, но не резкий. |
+
+</details>
+
+---
+
+## 2. `core/CameraManager.js` — Управляющий камерой
+
+Этот класс — "дирижёр" для камеры. Он создаёт камеру, настраивает OrbitControls и обновляет их в игровом цикле.
+
+<div align="center">
+  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-8.png" alt="Код CameraManager" width="600"/>
+  <br>
+  <sub>Класс-менеджер камеры: создание, настройка и обновление</sub>
+</div>
+
+<details>
+<summary><b>📄 Код файла <code>src/core/CameraManager.js</code></b></summary>
+
+```javascript
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CAMERA_CONFIG } from '../config/camera.js';
+
+export class CameraManager {
+    // Конструктор принимает DOM-элемент рендерера (canvas)
+    // Он нужен OrbitControls, чтобы "слушать" события мыши на этом элементе
+    constructor(rendererDomElement) {
+        this.camera = null;          // Сама камера (PerspectiveCamera)
+        this.controls = null;        // Орбит-контролы (управление)
+        this.rendererDomElement = rendererDomElement; // Холст для событий
+    }
+
+    // Главный метод: создаёт и настраивает камеру
+    create() {
+        // 1. СОЗДАЁМ КАМЕРУ с параметрами из конфига
+        this.camera = new THREE.PerspectiveCamera(
+            CAMERA_CONFIG.fov,                           // угол обзора
+            window.innerWidth / window.innerHeight,      // соотношение сторон
+            CAMERA_CONFIG.near,                          // ближняя плоскость
+            CAMERA_CONFIG.far                            // дальняя плоскость
+        );
+
+        // 2. УСТАНАВЛИВАЕМ ПОЗИЦИЮ КАМЕРЫ
+        this.camera.position.set(
+            CAMERA_CONFIG.position.x,
+            CAMERA_CONFIG.position.y,
+            CAMERA_CONFIG.position.z
+        );
+
+        // 3. НАПРАВЛЯЕМ КАМЕРУ В ЦЕНТР СЦЕНЫ
+        this.camera.lookAt(
+            CAMERA_CONFIG.target.x,
+            CAMERA_CONFIG.target.y,
+            CAMERA_CONFIG.target.z
+        );
+        
+        // Возвращаем камеру на случай, если нужно сразу использовать
+        return this.camera;
+    }
+   
+    // Метод для создания и настройки OrbitControls
+    createControls() {
+        // Извлекаем настройки управления из конфига
+        const {
+            enableDamping, dampingFactor, autoRotate, autoRotateSpeed,
+            enableZoom, enablePan, zoomSpeed, rotateSpeed
+        } = CAMERA_CONFIG.controls;
+
+        // Создаём контролы, привязывая их к камере и DOM-элементу
+        this.controls = new OrbitControls(this.camera, this.rendererDomElement);
+
+        // Применяем настройки
+        this.controls.enableDamping = enableDamping;     // Плавность
+        this.controls.dampingFactor = dampingFactor;     // Сила инерции
+        this.controls.autoRotate = autoRotate;           // Автовращение
+        this.controls.autoRotateSpeed = autoRotateSpeed; // Скорость автовращения
+        this.controls.enableZoom = enableZoom;           // Разрешить зум
+        this.controls.enablePan = enablePan;             // Разрешить панорамирование
+        this.controls.zoomSpeed = zoomSpeed;             // Скорость зума
+        this.controls.rotateSpeed = rotateSpeed;         // Скорость вращения
+
+        // Устанавливаем точку, вокруг которой вращается камера
+        // (по умолчанию OrbitControls вращается вокруг центра, но мы задаём явно)
+        this.controls.target.set(
+            CAMERA_CONFIG.target.x,
+            CAMERA_CONFIG.target.y,
+            CAMERA_CONFIG.target.z
+        );
+
+        return this.controls;
+    }
+
+    // Метод, вызываемый в игровом цикле (каждый кадр)
+    update() {
+        if (this.controls) {
+            // ОБЯЗАТЕЛЬНО: обновляем контролы, если включена плавность (damping)
+            // Иначе инерция не будет работать
+            this.controls.update();
+        }
+    }
+
+    // Обработчик изменения размера окна (вызывается из Game)
+    onWindowResize() {
+        // Обновляем соотношение сторон камеры
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        // Важно! Пересчитываем матрицу проекции
+        this.camera.updateProjectionMatrix();
+    }
+
+    // Геттеры для получения камеры и контролов извне
+    getCamera() {
+        return this.camera;
+    }
+
+    getControls() {
+        return this.controls;
+    }
+}
+```
+</details>
+
+<details>
+<summary><b>🧠 Разбор ключевых моментов CameraManager</b></summary>
+
+*   **`constructor(rendererDomElement)`**: OrbitControls нужно на чём "слушать" события (движение мыши, колёсико). Мы передаём `renderer.domElement` — это HTML-элемент `<canvas>`, на котором Three.js рисует.
+*   **`createControls()`**: Этот метод создаёт "пульт управления". Без него камера была бы статичной. С ним ты можешь вращать сцену, приближать, отдалять.
+*   **`controls.update()`**: Это **критически важно**, если включена плавность (`enableDamping: true`). Без вызова `update()` в каждом кадре инерция не будет работать — камера будет дёрганой.
+*   **`onWindowResize()`**: При изменении размера окна пропорции камеры нарушаются. Этот метод пересчитывает `aspect` (соотношение сторон) и обновляет матрицу проекции.
+
+</details>
+
+---
+
+## 3. Обновление `main.js` — Подключаем CameraManager
+
+Теперь самое интересное: **уберём временную камеру** и подключим наш новый `CameraManager`. Код станет чище и профессиональнее.
+
+<div align="center">
+  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-9.png" alt="Обновлённый main.js с CameraManager" width="600"/>
+  <br>
+  <sub>Главный файл игры теперь использует CameraManager</sub>
+</div>
+
+<details>
+<summary><b>📄 Обновлённый код <code>src/main.js</code> (только изменения)</b></summary>
+
+**Что меняется:**
+1. Импортируем `CameraManager`.
+2. Добавляем свойство `this.cameraManager`.
+3. В `init()` создаём `CameraManager` и вызываем его методы.
+4. Убираем **всю** временную камеру и управление из `main.js`.
+5. В `animate()` вызываем `this.cameraManager.update()`.
+6. В `onWindowResize()` делегируем вызов менеджеру камеры.
+
+```javascript
+import * as THREE from 'three';
+import { SceneManager } from './core/SceneManager.js';
+import { CameraManager } from './core/CameraManager.js';      // НОВЫЙ ИМПОРТ
+// LightManager появится в Уроке 4
+
+class Game {
+    constructor() {
+        this.renderer = null;
+        this.sceneManager = null;
+        this.cameraManager = null;    // НОВОЕ СВОЙСТВО
+        // this.lightManager = null;
+        
+        this.init();
+    }
+
+    init() {
+        // 1. РЕНДЕРЕР (без изменений)
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(this.renderer.domElement);
+
+        // 2. СЦЕНА (без изменений)
+        this.sceneManager = new SceneManager();
+        const scene = this.sceneManager.create();
+
+        // 3. КАМЕРА И УПРАВЛЕНИЕ (НОВЫЙ КОД!)
+        //    Передаём DOM-элемент рендерера для OrbitControls
+        this.cameraManager = new CameraManager(this.renderer.domElement);
+        this.cameraManager.create();           // Создаём камеру
+        this.cameraManager.createControls();   // Создаём управление
+        
+        // Получаем готовую камеру для рендеринга
+        const camera = this.cameraManager.getCamera();
+
+        // 4. ВРЕМЕННЫЙ СВЕТ (пока оставляем, в Уроке 4 заменим на LightManager)
+        const ambientLight = new THREE.AmbientLight(0x404060);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+        dirLight.position.set(5, 10, 7);
+        scene.add(ambientLight);
+        scene.add(dirLight);
+        
+        // 5. ТЕСТОВЫЙ КУБ (пока оставляем, чтобы убедиться, что всё работает)
+        const testCubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+        const testCubeMaterial = new THREE.MeshStandardMaterial({ color: 0x44aa88, metalness: 0.6 });
+        const testCube = new THREE.Mesh(testCubeGeometry, testCubeMaterial);
+        testCube.castShadow = true;
+        scene.add(testCube);
+        this.testCube = testCube;
+
+        // 6. ОБРАБОТЧИК РЕСАЙЗА (обновлён!)
+        window.addEventListener('resize', () => this.onWindowResize());
+
+        // 7. ЗАПУСК АНИМАЦИИ
+        this.animate();
+    }
+
+    onWindowResize() {
+        // Теперь вызываем метод менеджера камеры
+        if (this.cameraManager) {
+            this.cameraManager.onWindowResize();
+        }
+        // Рендерер тоже обновляем
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    animate() {
+        requestAnimationFrame(() => this.animate());
+
+        // Обновляем менеджеры
+        this.sceneManager.update();
+        
+        // ВАЖНО! Обновляем контролы камеры (для плавности)
+        if (this.cameraManager) {
+            this.cameraManager.update();
+        }
+        
+        // Вращаем тестовый куб
+        if (this.testCube) {
+            this.testCube.rotation.x += 0.005;
+            this.testCube.rotation.y += 0.01;
+        }
+        
+        // Рендерим сцену с камерой из CameraManager
+        this.renderer.render(
+            this.sceneManager.getScene(),
+            this.cameraManager.getCamera()   // Получаем камеру из менеджера
+        );
+    }
+}
+
+// ЗАПУСК
+const game = new Game();
+```
+</details>
+
+<details>
+<summary><b>🎬 Что изменилось в игровом цикле?</b></summary>
+
+| Было (временная камера) | Стало (CameraManager) |
+|--------------------------|----------------------|
+| Камера создавалась прямо в `init()` | Камера создаётся через `this.cameraManager.create()` |
+| Не было управления (нельзя вращать/зумить) | Добавлены OrbitControls через `this.cameraManager.createControls()` |
+| Ресайз окна обрабатывался вручную | Вызываем `this.cameraManager.onWindowResize()` |
+| В `animate()` нечего было обновлять | Вызываем `this.cameraManager.update()` для плавности |
+| Рендер: `renderer.render(scene, this.camera)` | Рендер: `renderer.render(scene, this.cameraManager.getCamera())` |
+
+</details>
+
+---
+
+## 🖱 Как пользоваться OrbitControls
+
+После запуска ты почувствуешь разницу! Теперь 3D-мир **живой**.
+
+| Действие | Результат |
+|----------|-----------|
+| **Левая кнопка мыши + движение** | Вращение камеры вокруг центра сцены |
+| **Правая кнопка мыши + движение** | Панорамирование (движение камеры в стороны) |
+| **Колёсико мыши** | Приближение/отдаление |
+| **Колёсико + Ctrl** | Более медленный зум |
+
+<div align="center">
+  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-10.png" alt="Демонстрация OrbitControls" width="600"/>
+  <br>
+  <sub><strong>Результат:</strong> Ты можешь вращать камеру, приближать куб и рассматривать звёзды со всех сторон!</sub>
+</div>
+
+---
+
+## 🎉 Итоги Урока 3
+
+Поздравляю! Камера перестала быть статичным "штативом" и стала полноценным инструментом исследования.
+
+**Что мы сделали:**
+1.  ✅ Создали **конфиг камеры** (`camera.js`) со всеми параметрами.
+2.  ✅ Написали **класс `CameraManager`**, который управляет камерой и OrbitControls.
+3.  ✅ **Интегрировали** `CameraManager` в главный класс `Game`, убрав временную камеру.
+4.  ✅ Научились обрабатывать **ресайз окна** на уровне менеджера.
+5.  ✅ Теперь мы можем **вращать, приближать и панорамировать** сцену.
+
+**Что дальше?**
+В **Уроке 4** мы создадим `LightManager` и `light.js`. Освещение — это 80% визуального качества. Мы добавим три источника света:
+- **AmbientLight** — общий рассеянный свет.
+- **DirectionalLight** — главный направленный свет (как солнце) с тенями.
+- **RimLight (контровой свет)** — красивый свет сзади, который подчеркивает контуры объектов. И сделаем его **пульсирующим**!
+
+Скоро твоя сцена засияет по-настоящему! ✨
+
+---
+
+<div align="center">
+
+Камера — глаза игрока. Хороший обзор — половина успеха игры!
+
+---
+
+[⬆ К началу урока 3](#-threejs-3d-game--урок-3)
+
+</div>
+
+
+</details>
+
+
+![divider](https://github.com/Gabryelf/Atlas-Assets/raw/main/docs/animations/gifs-line/pulse-grey.gif)
+
+
 
