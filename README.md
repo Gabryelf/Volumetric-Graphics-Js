@@ -1302,7 +1302,7 @@ const game = new Game();
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?logo=javascript&logoColor=white)](https://www.javascript.com/)
 [![OrbitControls](https://img.shields.io/badge/OrbitControls-3D%20Navigation-blueviolet)](https://threejs.org/docs/#examples/en/controls/OrbitControls)
 
-<img src="https://threejs.org/examples/screenshots/webgl_controls_orbit.jpg" alt="OrbitControls Three.js" width="400"/>
+<img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-11.png" alt="OrbitControls Three.js" width="400"/>
 
 *Камера — это глаза игрока. Научимся управлять взглядом.*
 
