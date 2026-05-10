@@ -1753,3 +1753,542 @@ const game = new Game();
 
 
 
+<details> <summary><strong>📁 Этап 4: Освещение и вспомогательные инструменты </strong></summary>
+
+
+<div align="center">
+
+# 🎮 Three.js 3D Game — Урок 4
+
+### Освещение и Отладка: Оживляем сцену светом
+
+[![Three.js](https://img.shields.io/badge/Three.js-r160-black?logo=three.js&logoColor=white)](https://threejs.org/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?logo=javascript&logoColor=white)](https://www.javascript.com/)
+[![PBR](https://img.shields.io/badge/PBR-Lighting-orange)](https://en.wikipedia.org/wiki/Physically_based_rendering)
+
+<img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/cube-rotate.gif" alt="Тени в Three.js" width="400"/>
+
+*Свет создаёт настроение. Тени придают реализм. А инструменты отладки помогают видеть невидимое.*
+
+</div>
+
+---
+
+# 🌟 Об уроке
+
+До сих пор наша сцена выглядела... плоско. Даже с красивыми звёздами и вращающимся кубом чего-то не хватало. Чего? **Света и теней!**
+
+В реальном мире мы видим объекты благодаря тому, как свет отражается от них. В 3D-графике то же самое — без правильного освещения даже самая сложная модель выглядит как плоская картинка.
+
+Кроме того, мы добавим **вспомогательные инструменты** — оси координат и тестовый куб. Они не для игроков, а для нас, разработчиков, чтобы легче ориентироваться в пространстве.
+
+## 🎯 Что ты узнаешь
+
+После завершения этого урока ты будешь понимать:
+
+- ✅ 💡 **`LightManager`** — класс для управления всеми источниками света.
+- ✅ ☀️ **Три типа света**: Ambient (рассеянный), Directional (направленный), Rim (контровой).
+- ✅ 🌑 **Тени** — как включить и настроить отбрасывание теней.
+- ✅ ✨ **Динамическое освещение** — заставим контровой свет пульсировать.
+- ✅ 🛠 **`Settings` (утилита)** — создание вспомогательных инструментов для отладки.
+- ✅ 📐 **AxesHelper** — оси координат (X, Y, Z) для навигации.
+- ✅ 🧪 **Тестовый куб** — базовый объект для проверки освещения.
+
+---
+
+## 📁 Структура проекта (обновлённая)
+
+Добавляем `LightManager`, его конфиг и папку `utils` с `Settings.js`:
+
+```
+📦 your-project-folder/
+ ┣ 📂 src/
+ ┃ ┣ 📂 config/
+ ┃ ┃ ┣ 📜 scene.js          # (из Урока 2)
+ ┃ ┃ ┣ 📜 camera.js         # (из Урока 3)
+ ┃ ┃ ┗ 📜 light.js          # НОВЫЙ ФАЙЛ! Конфиг освещения
+ ┃ ┣ 📂 core/
+ ┃ ┃ ┣ 📜 SceneManager.js   # (из Урока 2)
+ ┃ ┃ ┣ 📜 CameraManager.js  # (из Урока 3)
+ ┃ ┃ ┗ 📜 LightManager.js   # НОВЫЙ ФАЙЛ! Управление светом
+ ┃ ┣ 📂 utils/              # НОВАЯ ПАПКА!
+ ┃ ┃ ┗ 📜 Settings.js       # НОВЫЙ ФАЙЛ! Вспомогательные утилиты
+ ┃ ┗ 📜 main.js             # ОБНОВЛЯЕТСЯ: добавляем LightManager и Settings
+ ┣ 📜 index.html
+ ┗ 📜 package.json
+```
+
+---
+
+# ЧАСТЬ 1: ОСВЕЩЕНИЕ
+
+## 1. `config/light.js` — Конфигурация освещения
+
+Свет бывает разным. Мы создадим три источника, каждый со своей ролью.
+
+<div align="center">
+  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-14.png" alt="Файл конфигурации освещения" width="600"/>
+  <br>
+  <sub>Три источника света = три слоя визуальной красоты</sub>
+</div>
+
+<details>
+<summary><b>📄 Код файла <code>src/config/light.js</code></b></summary>
+
+```javascript
+/**
+ * КОНФИГ ОСВЕЩЕНИЯ
+ * Три типа света для создания объёмной картинки
+ */
+
+export const LIGHT_CONFIG = {
+    // === ОСНОВНОЙ (НАПРАВЛЕННЫЙ) СВЕТ ===
+    // Играет роль солнца. Даёт яркий свет и чёткие тени.
+    main: {
+        type: 'directional',           // Тип: направленный свет
+        color: 0xffffff,               // Белый свет (нейтральный)
+        intensity: 1.2,                // Интенсивность (1.0 = нормальная)
+        position: {
+            x: 5,                      // Светит справа
+            y: 10,                     // Светит сверху
+            z: 7                       // Светит спереди
+        },
+        castShadow: true,              // Включаем отбрасывание теней
+        shadowMapSize: 1024            // Разрешение карты теней (чем выше, тем чётче)
+    },
+
+    // === РАССЕЯННЫЙ СВЕТ ===
+    // Заполняет всё пространство. Без него тени были бы абсолютно чёрными.
+    ambient: {
+        color: 0x404060,               // Холодный, слегка фиолетовый оттенок
+        intensity: 0.6                 // Мягкий, ненавязчивый
+    },
+
+    // === КОНТРОВОЙ СВЕТ ===
+    // Светит сзади и сбоку. Подчёркивает контуры объектов, создаёт "объём".
+    rim: {
+        type: 'directional',           // Тоже направленный
+        color: 0x6688aa,               // Голубоватый (холодный акцент)
+        intensity: 0.8,                // Достаточно яркий, но не перебивает основной
+        position: {
+            x: -3,                     // Светит слева
+            y: 2,                      // Немного сверху
+            z: -4                      // Светит сзади!
+        }
+    }
+};
+```
+</details>
+
+<details>
+<summary><b>💡 Роль каждого источника света</b></summary>
+
+| Тип света | Аналог в реальности | Роль в сцене |
+|-----------|---------------------|--------------|
+| **DirectionalLight (main)** | Солнце в полдень | Даёт **объём** и **тени**. Определяет, откуда идёт основной свет. |
+| **AmbientLight** | Свет, отражённый от стен и облаков | Заполняет **чёрные зоны**, делает тени мягкими. |
+| **RimLight (rim)** | Контражур на закате | Создаёт **красивую окантовку** вокруг объекта, отделяя его от фона. |
+
+**Визуализация расположения:**
+```
+        Сверху (Y+)
+           ↑
+    RIM ←  |  → MAIN
+    (-3,2,-4)  (5,10,7)
+           |
+    AMBIENT — везде и всегда
+```
+
+</details>
+
+---
+
+## 2. `core/LightManager.js` — Управляющий светом
+
+Этот класс создаёт все три источника света, добавляет их в сцену и обновляет динамические эффекты (пульсацию контрового света).
+
+<div align="center">
+  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-15.png" alt="Код LightManager" width="600"/>
+  <br>
+  <sub>LightManager: создание и динамическое обновление освещения</sub>
+</div>
+
+<details>
+<summary><b>📄 Код файла <code>src/core/LightManager.js</code></b></summary>
+
+```javascript
+import * as THREE from 'three';
+import { LIGHT_CONFIG } from '../config/light.js';
+
+export class LightManager {
+    // Конструктор принимает сцену, куда будем добавлять свет
+    constructor(scene) {
+        this.scene = scene;
+        this.lights = {};   // Объект для хранения всех источников света
+    }
+
+    // Главный метод: создаём все источники света
+    createAll() {
+        this._createAmbientLight();   // Рассеянный свет
+        this._createMainLight();      // Основной направленный свет
+        this._createRimLight();       // Контровой свет (для красоты)
+
+        return this.lights;           // Возвращаем на всякий случай
+    }
+
+    // === РАССЕЯННЫЙ СВЕТ ===
+    _createAmbientLight() {
+        const config = LIGHT_CONFIG.ambient;
+        const light = new THREE.AmbientLight(config.color, config.intensity);
+        this.scene.add(light);
+        this.lights.ambient = light;
+    }
+
+    // === ОСНОВНОЙ НАПРАВЛЕННЫЙ СВЕТ (С ТЕНЯМИ!) ===
+    _createMainLight() {
+        const config = LIGHT_CONFIG.main;
+        const light = new THREE.DirectionalLight(config.color, config.intensity);
+        
+        // Устанавливаем позицию
+        light.position.set(config.position.x, config.position.y, config.position.z);
+
+        // Настройка теней
+        if (config.castShadow) {
+            light.castShadow = true;                           // Разрешить тени
+            light.shadow.mapSize.width = config.shadowMapSize; // Качество по ширине
+            light.shadow.mapSize.height = config.shadowMapSize;// Качество по высоте
+            
+            // Опционально: настройка области отображения теней
+            // (чем меньше область, тем чётче тени)
+            light.shadow.camera.near = 0.5;
+            light.shadow.camera.far = 20;
+            light.shadow.camera.left = -10;
+            light.shadow.camera.right = 10;
+            light.shadow.camera.top = 10;
+            light.shadow.camera.bottom = -10;
+        }
+
+        this.scene.add(light);
+        this.lights.main = light;
+    }
+
+    // === КОНТРОВОЙ СВЕТ (С ПУЛЬСАЦИЕЙ) ===
+    _createRimLight() {
+        const config = LIGHT_CONFIG.rim;
+        const light = new THREE.DirectionalLight(config.color, config.intensity);
+        light.position.set(config.position.x, config.position.y, config.position.z);
+        
+        this.scene.add(light);
+        this.lights.rim = light;
+    }
+
+    // Метод, вызываемый в игровом цикле (каждый кадр)
+    update() {
+        // Эффект "пульсации" контрового света
+        if (this.lights.rim) {
+            // Случайное изменение интенсивности от -0.15 до +0.15
+            const random = Math.random() * 0.3 - 0.15;
+            const baseIntensity = LIGHT_CONFIG.rim.intensity;
+            // Интенсивность не опускается ниже 0.2 (чтобы свет не выключался полностью)
+            this.lights.rim.intensity = Math.max(0.2, baseIntensity + random);
+        }
+    }
+
+    // Геттер для получения конкретного источника света по имени
+    getLight(name) {
+        return this.lights[name];
+    }
+}
+```
+</details>
+
+<details>
+<summary><b>🧠 Разбор ключевых концепций LightManager</b></summary>
+
+**1. Почему три света, а не один?**
+- Один свет делает сцену **плоской** — одни стороны яркие, другие в тени, без переходов.
+- Три света создают **глубину**: основной свет формирует объём, рассеянный смягчает контраст, контровой подчёркивает края.
+
+**2. Что такое `shadowMapSize: 1024`?**
+- Тени в Three.js — это "карты теней" (shadow maps), специальные текстуры.
+- Размер 1024x1024 пикселя — хорошее качество без потери производительности.
+- 512 — чуть размытые тени, 2048 — очень чёткие, но тяжелее.
+
+**3. Как работает пульсация контрового света?**
+```javascript
+const random = Math.random() * 0.3 - 0.15;  // Диапазон: [-0.15, +0.15]
+const newIntensity = baseIntensity + random;
+this.lights.rim.intensity = Math.max(0.2, newIntensity);
+```
+В каждом кадре интенсивность случайно меняется. Это создаёт эффект "дышащего" света — будто светится плазма или энергетическое поле.
+
+</details>
+
+---
+
+# ЧАСТЬ 2: ВСПОМОГАТЕЛЬНЫЕ УТИЛИТЫ
+
+## 3. `utils/Settings.js` — Инструменты отладки
+
+Разработчику нужно видеть то, что не видит игрок: оси координат, границы объектов, направление света. Класс `Settings` поможет нам в этом.
+
+<div align="center">
+  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-16.png" alt="Код Settings.js" width="600"/>
+  <br>
+  <sub>Утилиты для отладки: AxesHelper и тестовый куб</sub>
+</div>
+
+<details>
+<summary><b>📄 Код файла <code>src/utils/Settings.js</code></b></summary>
+
+```javascript
+import * as THREE from 'three';
+
+export class Settings {
+    // Конструктор принимает сцену, куда будем добавлять вспомогательные объекты
+    constructor(scene) {
+        this.scene = scene;
+    }
+
+    // Создаём все вспомогательные элементы
+    createAllSettings() {
+        this._createAxesHelper();   // Оси координат
+        this._createBaseCube();      // Тестовый куб (базовый материал!)
+    }
+
+    // === ОСИ КООРДИНАТ ===
+    // AxesHelper показывает направления X, Y, Z
+    // Красный = X, Зелёный = Y, Синий = Z
+    _createAxesHelper() {
+        const axesHelper = new THREE.AxesHelper(5);  // Длина осей = 5 юнитов
+        this.scene.add(axesHelper);
+    }
+
+    // === ТЕСТОВЫЙ КУБ ===
+    // Важно: используется MeshBasicMaterial — он НЕ реагирует на свет!
+    // Этот куб всегда будет ярким, даже если в сцене нет освещения.
+    // Идеально для проверки, правильно ли работает свет на других объектах.
+    _createBaseCube() {
+        const geometry = new THREE.BoxGeometry(5, 5, 5);
+        // MeshBasicMaterial — не требует освещения, виден всегда
+        const material = new THREE.MeshBasicMaterial({ color: 0xE0644C });
+        const cube = new THREE.Mesh(geometry, material);
+        this.scene.add(cube);
+    }
+}
+```
+</details>
+
+<details>
+<summary><b>🛠 Зачем нужны эти утилиты?</b></summary>
+
+| Инструмент | Как выглядит | Зачем нужен |
+|------------|--------------|-------------|
+| **AxesHelper** | Три цветные линии | Помогает понять, где находится **центр сцены** и куда направлены оси. Красный = вправо (X), Зелёный = вверх (Y), Синий = на зрителя (Z). |
+| **BaseCube (BasicMaterial)** | Яркий оранжевый куб | Проверяет, **отображаются ли объекты вообще**. Этот куб всегда виден, даже если свет выключен или настроен неправильно. |
+
+**Типичный сценарий использования:**
+1. Ты добавил сложное освещение, но сцена тёмная.
+2. Включаешь `BaseCube` — он яркий? Значит, проблема в свете.
+3. Выключаешь `BaseCube` — включаешь `AxesHelper` — видишь оси? Значит, камера смотрит не туда или объекты не добавлены.
+
+</details>
+
+---
+
+## 4. Обновление `main.js` — Финальная сборка
+
+Теперь соберём всё вместе: `LightManager` и `Settings` интегрируются в главный класс `Game`. Временные свет и куб уходят — их место заняли профессиональные менеджеры.
+
+<div align="center">
+  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-12.png" alt="Финальный main.js" width="600"/>
+  <br>
+  <sub>Используем тусклое освещение</sub>
+</div>
+
+<div align="center">
+  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-13.png" alt="Финальный main.js" width="600"/>
+  <br>
+  <sub>Используем яркое освещение</sub>
+</div>
+
+<details>
+<summary><b>📄 Итоговый код <code>src/main.js</code></b></summary>
+
+```javascript
+import * as THREE from 'three';
+import { SceneManager } from './core/SceneManager.js';
+import { CameraManager } from './core/CameraManager.js';
+import { LightManager } from './core/LightManager.js';
+import { Settings } from './utils/Settings.js';
+
+class Game {
+    constructor() {
+        this.renderer = null;
+        this.sceneManager = null;
+        this.cameraManager = null;
+        this.lightManager = null;
+        this.settings = null;        // НОВОЕ: утилиты отладки
+
+        this.init();
+    }
+
+    init() {
+        // 1. РЕНДЕРЕР
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.shadowMap.enabled = true;   // Включаем поддержку теней
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(this.renderer.domElement);
+
+        // 2. СЦЕНА (звёзды + туман)
+        this.sceneManager = new SceneManager();
+        const scene = this.sceneManager.create();
+
+        // 3. КАМЕРА И УПРАВЛЕНИЕ
+        this.cameraManager = new CameraManager(this.renderer.domElement);
+        this.cameraManager.create();
+        this.cameraManager.createControls();
+
+        // 4. ОСВЕЩЕНИЕ (НОВОЕ!)
+        this.lightManager = new LightManager(scene);
+        this.lightManager.createAll();
+
+        // 5. УТИЛИТЫ ОТЛАДКИ (НОВОЕ!)
+        this.settings = new Settings(scene);
+        this.settings.createAllSettings();
+
+        // 6. ТЕСТОВЫЙ ОБЪЕКТ ДЛЯ ПРОВЕРКИ ОСВЕЩЕНИЯ
+        //    Создаём красивый металлический тор, чтобы оценить свет и тени
+        const torusGeometry = new THREE.TorusGeometry(1.5, 0.4, 32, 100);
+        const torusMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x44aa88, 
+            metalness: 0.7,    // Металлический блеск
+            roughness: 0.3,    // Немного шероховатый
+            emissive: 0x112233 // Слабое свечение
+        });
+        const torus = new THREE.Mesh(torusGeometry, torusMaterial);
+        torus.castShadow = true;
+        torus.receiveShadow = false;
+        torus.position.y = 1;
+        scene.add(torus);
+        this.testObject = torus;
+
+        // 7. ОБРАБОТЧИК РЕСАЙЗА
+        window.addEventListener('resize', () => this.onWindowResize());
+
+        // 8. ЗАПУСК АНИМАЦИИ
+        this.animate();
+    }
+
+    onWindowResize() {
+        if (this.cameraManager) {
+            this.cameraManager.onWindowResize();
+        }
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    animate() {
+        requestAnimationFrame(() => this.animate());
+
+        // Обновляем все менеджеры
+        this.sceneManager.update();      // Звёзды мерцают
+        this.cameraManager.update();     // Плавность камеры
+        this.lightManager.update();      // Контровой свет пульсирует
+
+        // Анимация тестового объекта (вращение)
+        if (this.testObject) {
+            this.testObject.rotation.x += 0.008;
+            this.testObject.rotation.y += 0.012;
+            this.testObject.rotation.z += 0.005;
+        }
+
+        // Рендерим сцену
+        this.renderer.render(
+            this.sceneManager.getScene(),
+            this.cameraManager.getCamera()
+        );
+    }
+}
+
+// ЗАПУСК ИГРЫ
+const game = new Game();
+```
+</details>
+
+<details>
+<summary><b>🎬 Что изменилось в финальной версии?</b></summary>
+
+| Компонент | Временная версия (Урок 2-3) | Финальная версия (Урок 4) |
+|-----------|----------------------------|---------------------------|
+| **Освещение** | Ambient + Directional прямо в `main.js` | `LightManager` с тремя источниками + пульсация |
+| **Тестовый куб** | Обычный куб с `MeshStandardMaterial` | Тор (бублик) с металлическими свойствами — красивее и нагляднее |
+| **Отладка** | Отсутствовала | `Settings` — оси координат и контрольный куб |
+| **Тени** | Не были настроены | Включены и настроены у основного света |
+| **Динамика** | Только вращение куба | + пульсация контрового света + мерцание звёзд |
+
+</details>
+
+---
+
+## 🎨 Итоговый результат
+
+**Что ты видишь на экране:**
+1. ✨ **Мерцающие звёзды** — фон создаёт ощущение глубины космоса.
+2. 🟠 **Оси координат** (красная, зелёная, синяя линии) — помогают ориентироваться.
+3. 🟤 **Оранжевый куб** (`MeshBasicMaterial`) — всегда яркий, проверяет работу рендера.
+4. 🌀 **Красивый металлический тор** — вращается, отбрасывает тени, реагирует на свет.
+5. 💡 **Динамическое освещение** — контровой свет мягко пульсирует, меняя интенсивность.
+
+**Попробуй:**
+- Покрути сцену мышкой → увидишь, как меняются тени.
+- Приблизь тор → рассмотри, как свет отражается от металлической поверхности.
+- Обрати внимание на пульсацию — задний свет меняет яркость каждую секунду.
+
+---
+
+## 🎉 Итоги Урока 4
+
+Поздравляю! Мы завершили фундаментальную архитектуру игры. Теперь проект не просто "что-то работает" — это **профессиональная, расширяемая система**.
+
+**Что мы сделали:**
+1.  ✅ Создали **`LightManager`** с тремя источниками света: рассеянным, основным и контровым.
+2.  ✅ Настроили **тени** — объекты теперь отбрасывают их и выглядят объёмно.
+3.  ✅ Добавили **динамический эффект** — контровой свет пульсирует, оживляя сцену.
+4.  ✅ Создали папку **`utils/`** и класс **`Settings`** с осями координат и тестовым кубом.
+5.  ✅ **Обновили `main.js`** — теперь все менеджеры работают вместе, а временные заглушки ушли.
+6.  ✅ Заменили скучный куб на **красивый металлический тор** — оценить свет и тени стало нагляднее.
+
+---
+
+## 🚀 Что дальше?
+
+База готова! Теперь мы можем двигаться в любом направлении:
+
+- **Добавить модели** — загрузить 3D-модели кораблей, персонажей (форматы glTF, OBJ).
+- **Создать анимации** — прыжки, вращение, полёт объектов.
+- **Добавить физику** — столкновения, гравитация (библиотека Cannon.es или Ammo.js).
+- **Сделать мультиплеер** — WebSockets + сервер на Node.js.
+- **Улучшить графику** — пост-эффекты, bloom, шейдеры.
+
+Но это уже темы для следующих больших разделов!
+
+---
+
+<div align="center">
+
+Свет — это душа 3D-сцены. Теперь можно создать множество источников света для лучшего визуального опыта ✨
+
+---
+
+[⬆ К началу урока 4](#-threejs-3d-game--урок-4)
+
+</div>
+
+
+</details>
+
+![divider](https://github.com/Gabryelf/Atlas-Assets/raw/main/docs/animations/gifs-line/pulse-grey.gif)
+
+
+
