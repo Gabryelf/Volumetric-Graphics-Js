@@ -1752,6 +1752,12 @@ const game = new Game();
 ![divider](https://github.com/Gabryelf/Atlas-Assets/raw/main/docs/animations/gifs-line/pulse-grey.gif)
 
 
+![Версия](https://img.shields.io/badge/версия-0.0.4-brightgreen)
+![js](https://img.shields.io/badge/javascript-yellow)
+![css-3](https://img.shields.io/badge/3-D-blue)
+![html-5](https://img.shields.io/badge/html-5-orange)
+![canvas](https://img.shields.io/badge/canvas-API-cyan)
+
 
 <details> <summary><strong>📁 Этап 4: Освещение и вспомогательные инструменты </strong></summary>
 
