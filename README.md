@@ -801,22 +801,6 @@ const cube: THREE.Mesh = new THREE.Mesh(geometry, material);
 
 # 🎮 Three.js 3D Game — Урок 2
 
-### Формируем рабочую зону
-
-[![Three.js](https://img.shields.io/badge/Three.js-r160-black?logo=three.js&logoColor=white)](https://threejs.org/)
-[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?logo=javascript&logoColor=white)](https://www.javascript.com/)
-[![HTML5](https://img.shields.io/badge/HTML5-Canvas-orange?logo=html5&logoColor=white)](https://developer.mozilla.org/ru/docs/Web/HTML)
-
-<img src=" " alt="Three.js Cube" width="400"/>
-
-*Проект - это каталог с модулями которые разделяются логически*
-
-</div>
-
-<div align="center">
-
-# 🎮 Three.js 3D Game — Урок 2
-
 ### Архитектура игры: Сцена и Игровой Цикл
 
 [![Three.js](https://img.shields.io/badge/Three.js-r160-black?logo=three.js&logoColor=white)](https://threejs.org/)
