@@ -2297,4 +2297,721 @@ const game = new Game();
 ![divider](https://github.com/Gabryelf/Atlas-Assets/raw/main/docs/animations/gifs-line/pulse-grey.gif)
 
 
+![Версия](https://img.shields.io/badge/версия-0.0.5-brightgreen)
+![js](https://img.shields.io/badge/javascript-yellow)
+![3D](https://img.shields.io/badge/3D-Models-blue)
+![glTF](https://img.shields.io/badge/glTF-Loader-purple)
+
+<details> <summary><strong>📁 Этап 5: Модели и примитивы — полный контроль над 3D-объектами</strong></summary>
+
+<div align="center">
+
+# 🎮 Three.js 3D Game — Урок 5
+
+### Модели и Примитивы: Загружаем сложные объекты и создаём простые
+
+[![Three.js](https://img.shields.io/badge/Three.js-r160-black?logo=three.js&logoColor=white)](https://threejs.org/)
+[![GLTF](https://img.shields.io/badge/GLTF-2.0-green?logo=gltf&logoColor=white)](https://www.khronos.org/gltf/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?logo=javascript&logoColor=white)](https://www.javascript.com/)
+
+<img src="https://threejs.org/examples/screenshots/webgl_loader_gltf.jpg" alt="GLTF модель в Three.js" width="400"/>
+
+*От простых кубов до сложных 3D-моделей — полный контроль над объектами в твоей сцене*
+
+</div>
+
+---
+
+# 🌟 Об уроке
+
+В прошлых уроках мы создали красивую сцену с освещением, камерой и звёздами. Но один тор — это слишком мало для настоящей игры! Пришло время наполнить мир разнообразными объектами.
+
+В этом уроке мы научимся:
+- **Создавать различные примитивы** (кубы, сферы, цилиндры) с разными материалами
+- **Загружать сложные 3D-модели** в формате glTF
+- **Управлять коллекцией моделей** через удобный ModelLoader
+- **Организовывать код** по принципу разделения ответственности
+
+## 🎯 Что ты узнаешь
+
+После завершения этого урока ты будешь понимать:
+
+- ✅ 📦 **`Settings.js` (расширенный)** — создание разнообразных примитивов с разными материалами.
+- ✅ 🚀 **`ModelLoader.js`** — класс для асинхронной загрузки glTF-моделей.
+- ✅ 📋 **`MODELS_CONFIG`** — конфигурация моделей (URL, масштаб, цвет).
+- ✅ 🔄 **Управление моделями** — загрузка, отображение и переключение между моделями.
+- ✅ ⚡ **Асинхронное программирование** — работа с Promise и async/await.
+- ✅ 🎯 **Интеграция** — объединение примитивов и моделей в одной сцене.
+
+---
+
+## 📁 Структура проекта (обновлённая)
+
+Добавляем `ModelLoader.js`, `models.js` и расширяем `Settings.js`:
+
+```
+📦 your-project-folder/
+ ┣ 📂 src/
+ ┃ ┣ 📂 config/
+ ┃ ┃ ┣ 📜 scene.js          # (из Урока 2)
+ ┃ ┃ ┣ 📜 camera.js         # (из Урока 3)
+ ┃ ┃ ┣ 📜 light.js          # (из Урока 4)
+ ┃ ┃ ┗ 📜 models.js         # НОВЫЙ ФАЙЛ! Конфигурация моделей
+ ┃ ┣ 📂 core/
+ ┃ ┃ ┣ 📜 SceneManager.js   # (из Урока 2)
+ ┃ ┃ ┣ 📜 CameraManager.js  # (из Урока 3)
+ ┃ ┃ ┣ 📜 LightManager.js   # (из Урока 4)
+ ┃ ┃ ┗ 📜 ModelLoader.js    # НОВЫЙ ФАЙЛ! Загрузчик моделей
+ ┃ ┣ 📂 utils/
+ ┃ ┃ ┗ 📜 Settings.js       # РАСШИРЯЕТСЯ! Больше примитивов
+ ┃ ┗ 📜 main.js             # ОБНОВЛЯЕТСЯ: интегрируем ModelLoader
+ ┣ 📜 index.html
+ ┗ 📜 package.json
+```
+
+---
+
+# ЧАСТЬ 1: РАСШИРЯЕМ SETTINGS.JS — МИР ПРИМИТИВОВ
+
+Начнём с создания разнообразных базовых фигур. Они помогут нам оценить освещение и заполнить сцену.
+
+## 1. Расширенный `utils/Settings.js`
+
+Теперь наш `Settings` будет создавать не только оси и тестовый куб, но и целую коллекцию примитивов с разными материалами.
+
+<div align="center">
+  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-17.png" alt="Расширенный Settings.js" width="600"/>
+  <br>
+  <sub>Теперь Settings создаёт целую коллекцию примитивов</sub>
+</div>
+
+<details>
+<summary><b>📄 Код файла <code>src/utils/Settings.js</code> (расширенная версия)</b></summary>
+
+```javascript
+import * as THREE from 'three';
+
+export class Settings {
+    constructor(scene) {
+        this.scene = scene;
+        this.grid = null;           // Сохраняем ссылку на сетку (пригодится)
+    }
+
+    // Главный метод — создаём всё, что нужно для настройки
+    createAllSettings() {
+        this._createMoreHelpers();   // Вспомогательные объекты
+        this._createMoreMesh();      // Примитивы для демонстрации
+    }
+
+    // === ВСПОМОГАТЕЛЬНЫЕ ОБЪЕКТЫ ===
+    _createMoreHelpers() {
+        // this._createAxesHelper();     // Оси координат (закомментировано, чтобы не мешали)
+        this._createGridHelper();       // Сетка с прозрачностью
+        this._createFloorPlane();       // Прозрачный пол для теней
+        // this._createPlaneHelper();    // Вспомогательная плоскость (опционально)
+    }
+
+    // === ПРИМИТИВЫ ДЛЯ ДЕМОНСТРАЦИИ ===
+    _createMoreMesh() {
+        this._createBaseCube();      // Базовый куб (BasicMaterial — всегда виден)
+        this._createBaseSphere();    // Сфера с металлическим материалом
+        this._createCustomFigure();  // Пользовательская фигура (ровный квадрат)
+    }
+
+    // --- ОСИ КООРДИНАТ (опционально) ---
+    _createAxesHelper() {
+        const axesHelper = new THREE.AxesHelper(5);
+        this.scene.add(axesHelper);
+    }
+
+    // --- БАЗОВЫЙ КУБ (всегда виден, не зависит от света) ---
+    _createBaseCube() {
+        const geometry = new THREE.BoxGeometry(5, 5, 5);
+        const material = new THREE.MeshBasicMaterial({ color: 0xE0644C });
+        const cube = new THREE.Mesh(geometry, material);
+        this.scene.add(cube);
+    }
+
+    // --- СФЕРА С МЕТАЛЛИЧЕСКИМ МАТЕРИАЛОМ ---
+    _createBaseSphere() {
+        const geometry = new THREE.SphereGeometry(2, 32, 32);  // 32 сегмента для гладкости
+        const material = new THREE.MeshStandardMaterial({
+            color: 0x7B68EE,        // Фиолетовый (пурпурный)
+            roughness: 0.3,         // Гладкая поверхность
+            metalness: 0.8,         // Высокая металличность
+            transparent: true,      // Прозрачная
+            opacity: 0.9
+        });
+        const sphere = new THREE.Mesh(geometry, material);
+        sphere.position.x = 8;       // Смещаем вправо
+        sphere.castShadow = true;
+        sphere.receiveShadow = false;
+        this.scene.add(sphere);
+    }
+
+    // --- ПОЛЬЗОВАТЕЛЬСКАЯ ФИГУРА (два треугольника, образующих квадрат) ---
+    _createCustomFigure() {
+        const geometry = new THREE.BufferGeometry();
+        
+        // Вершины для двух треугольников, образующих квадрат
+        const vertices = new Float32Array([
+            -1.0, -1.0,  1.0,  // v0 - левый нижний
+             1.0, -1.0,  1.0,  // v1 - правый нижний
+             1.0,  1.0,  1.0,  // v2 - правый верхний
+             1.0,  1.0,  1.0,  // v3 - правый верхний (дубль для второго треугольника)
+            -1.0,  1.0,  1.0,  // v4 - левый верхний
+            -1.0, -1.0,  1.0   // v5 - левый нижний (дубль)
+        ]);
+        
+        geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+        
+        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.material.side = THREE.DoubleSide;  // Видимо с обеих сторон
+        
+        // Добавляем к сетке (которая создана в _createGridHelper)
+        if (this.grid) {
+            this.grid.add(mesh);
+        } else {
+            this.scene.add(mesh);
+        }
+    }
+
+    // --- СЕТКА (GridHelper) с прозрачностью и смещением вниз ---
+    _createGridHelper() {
+        const size = 10;
+        const divisions = 10;
+        const gridHelper = new THREE.GridHelper(size, divisions);
+        gridHelper.position.y = -3;              // Опускаем ниже
+        gridHelper.material.transparent = true;
+        gridHelper.material.opacity = 0.5;
+        this.scene.add(gridHelper);
+        this.grid = gridHelper;                  // Сохраняем для пользовательской фигуры
+    }
+
+    // --- ВСПОМОГАТЕЛЬНАЯ ПЛОСКОСТЬ (опционально) ---
+    _createPlaneHelper() {
+        const plane = new THREE.Plane(new THREE.Vector3(1, 1, 1), 9);
+        const helper = new THREE.PlaneHelper(plane, 8, 0xffff00);
+        this.scene.add(helper);
+    }
+
+    // --- ПРОЗРАЧНЫЙ ПОЛ ДЛЯ ТЕНЕЙ ---
+    _createFloorPlane() {
+        const floorPlane = new THREE.Mesh(
+            new THREE.PlaneGeometry(12, 12),
+            new THREE.MeshStandardMaterial({
+                color: 0x112233,
+                roughness: 0.8,
+                metalness: 0.2,
+                transparent: true,
+                opacity: 0.3,
+                side: THREE.DoubleSide
+            })
+        );
+        floorPlane.rotation.x = -Math.PI / 2;   // Поворачиваем горизонтально
+        floorPlane.position.y = -2.9;            // Чуть выше сетки
+        floorPlane.receiveShadow = true;         // Получает тени!
+        this.scene.add(floorPlane);
+    }
+}
+```
+</details>
+
+<details>
+<summary><b>🎨 Что нового в Settings.js?</b></summary>
+
+| Метод | Что создаёт | Особенности |
+|-------|-------------|-------------|
+| **`_createGridHelper()`** | Сетка 10x10 | Прозрачная, опущена вниз (y = -3) |
+| **`_createFloorPlane()`** | Пол для теней | Прозрачный, принимает тени |
+| **`_createBaseSphere()`** | Металлическая сфера | 32 сегмента, металличность 0.8 |
+| **`_createCustomFigure()`** | Квадрат из двух треугольников | Демонстрирует BufferGeometry |
+| **`_createBaseCube()`** | Оранжевый куб | BasicMaterial — не зависит от света |
+
+**Важная деталь:** 
+- `_createCustomFigure()` добавляет квадрат К сетке, а не к сцене. Это демонстрирует, как можно группировать объекты.
+- Закомментированный `_createAxesHelper()` можно раскомментировать при необходимости отладки.
+
+</details>
+
+---
+
+# ЧАСТЬ 2: ЗАГРУЗЧИК МОДЕЛЕЙ
+
+Теперь самое интересное — загрузка сложных 3D-моделей! Мы создадим класс `ModelLoader`, который умеет:
+- Асинхронно загружать модели в формате glTF
+- Отслеживать прогресс загрузки
+- Управлять коллекцией моделей
+- Переключаться между ними
+
+## 2. Конфигурация моделей `config/models.js`
+
+Сначала определим, какие модели мы будем загружать.
+
+<details>
+<summary><b>📄 Код файла <code>src/config/models.js</code></b></summary>
+
+```javascript
+/**
+ * КОНФИГ МОДЕЛЕЙ
+ * Список всех 3D-моделей, которые можно загрузить
+ */
+
+export const MODELS_CONFIG = {
+    // Список доступных моделей
+    models: [
+        {
+            id: 'assault_ship',
+            name: 'Штурмовой корабль',
+            url: 'https://raw.githubusercontent.com/Gabryelf/Atlas-Assets/main/docs/models/ships/scout.glb',
+            scale: 1.0,
+            color: 0xff4444,
+            rotationSpeed: 0.005
+        },
+        {
+            id: 'scout_ship',
+            name: 'Разведчик',
+            url: 'https://threejs.org/examples/models/gltf/Horse.glb',  // Запасная модель
+            scale: 0.5,
+            color: 0x44ff44,
+            rotationSpeed: 0.008
+        }
+        // Можно добавлять новые модели сюда!
+    ],
+    
+    // Настройки загрузки по умолчанию
+    loading: {
+        showProgress: true,      // Показывать прогресс в консоли
+        defaultScale: 1.0,       // Масштаб по умолчанию
+        timeout: 30000           // Таймаут загрузки (30 секунд)
+    }
+};
+```
+</details>
+
+---
+
+## 3. Класс `core/ModelLoader.js`
+
+Это сердце нашей системы загрузки моделей. Он умеет:
+- Загружать одну модель по URL
+- Управлять списком моделей
+- Переключаться между ними
+- Обрабатывать ошибки
+
+<div align="center">
+  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-18.png" alt="ModelLoader.js" width="600"/>
+  <br>
+  <sub>ModelLoader — асинхронная загрузка и управление моделями</sub>
+</div>
+
+<details>
+<summary><b>📄 Код файла <code>src/core/ModelLoader.js</code></b></summary>
+
+```javascript
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+export class ModelLoader {
+    constructor(scene) {
+        this.scene = scene;
+        this.loader = new GLTFLoader();
+        
+        // Хранилище загруженных моделей (по ID)
+        this.loadedModels = new Map();
+        
+        // Текущая активная модель
+        this.currentModel = null;
+        this.currentModelId = null;
+        
+        // Статус загрузки
+        this.isLoading = false;
+    }
+
+    /**
+     * Загружает модель по URL
+     * @param {string} url - URL модели (glTF/GLB)
+     * @param {number} scale - Масштаб модели
+     * @returns {Promise<THREE.Group>}
+     */
+    loadModel(url, scale = 1.0) {
+        return new Promise((resolve, reject) => {
+            this.isLoading = true;
+            console.log(`🚀 Начинаем загрузку модели: ${url}`);
+            
+            this.loader.load(
+                url,
+                (gltf) => {
+                    const model = gltf.scene;
+                    model.scale.set(scale, scale, scale);
+                    
+                    // Настраиваем тени для всех мешей в модели
+                    model.traverse((child) => {
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                        }
+                    });
+                    
+                    this.isLoading = false;
+                    console.log(`✅ Модель успешно загружена!`);
+                    resolve(model);
+                },
+                (progress) => {
+                    const percent = (progress.loaded / progress.total * 100).toFixed(2);
+                    console.log(`⏳ Загрузка модели: ${percent}%`);
+                },
+                (error) => {
+                    this.isLoading = false;
+                    console.error('❌ Ошибка загрузки модели:', error);
+                    reject(error);
+                }
+            );
+        });
+    }
+
+    /**
+     * Загружает модель по конфигурации
+     * @param {Object} modelInfo - Информация о модели из конфига
+     * @returns {Promise<THREE.Group>}
+     */
+    async loadModelFromConfig(modelInfo) {
+        const model = await this.loadModel(modelInfo.url, modelInfo.scale);
+        
+        // Сохраняем метаданные модели
+        model.userData = {
+            id: modelInfo.id,
+            name: modelInfo.name,
+            color: modelInfo.color,
+            rotationSpeed: modelInfo.rotationSpeed
+        };
+        
+        // Сохраняем в Map для быстрого доступа
+        this.loadedModels.set(modelInfo.id, model);
+        
+        return model;
+    }
+
+    /**
+     * Показывает модель по ID (загружает, если ещё не загружена)
+     * @param {string} modelId - ID модели из конфига
+     * @param {Object} config - Конфиг со списком моделей
+     */
+    async showModel(modelId, modelsConfig) {
+        // Находим информацию о модели
+        const modelInfo = modelsConfig.models.find(m => m.id === modelId);
+        if (!modelInfo) {
+            console.error(`❌ Модель с ID "${modelId}" не найдена в конфиге`);
+            return;
+        }
+        
+        // Скрываем текущую модель
+        this.hideCurrentModel();
+        
+        let model;
+        
+        // Проверяем, загружена ли уже модель
+        if (this.loadedModels.has(modelId)) {
+            console.log(`📦 Модель "${modelInfo.name}" уже загружена, достаём из кеша`);
+            model = this.loadedModels.get(modelId);
+        } else {
+            console.log(`🔄 Загружаем модель "${modelInfo.name}"...`);
+            model = await this.loadModelFromConfig(modelInfo);
+        }
+        
+        // Настраиваем позицию модели
+        model.position.x = -8;
+        model.position.z = 8;
+        model.position.y = 0;
+        
+        // Добавляем в сцену
+        this.scene.add(model);
+        this.currentModel = model;
+        this.currentModelId = modelId;
+        
+        console.log(`✨ Модель "${modelInfo.name}" отображается на сцене`);
+    }
+
+    /**
+     * Скрывает текущую модель (удаляет из сцены, но не из кеша)
+     */
+    hideCurrentModel() {
+        if (this.currentModel) {
+            this.scene.remove(this.currentModel);
+            this.currentModel = null;
+            this.currentModelId = null;
+        }
+    }
+
+    /**
+     * Обновление (вызывается каждый кадр)
+     * Здесь можно добавить анимацию модели
+     */
+    update() {
+        if (this.currentModel && this.currentModel.userData.rotationSpeed) {
+            // Вращаем текущую модель
+            this.currentModel.rotation.y += this.currentModel.userData.rotationSpeed;
+        }
+    }
+
+    /**
+     * Возвращает информацию о текущей модели
+     */
+    getCurrentModelInfo() {
+        if (this.currentModelId && this.currentModel) {
+            return {
+                id: this.currentModelId,
+                name: this.currentModel.userData.name,
+                color: this.currentModel.userData.color
+            };
+        }
+        return null;
+    }
+}
+```
+</details>
+
+<details>
+<summary><b>🧠 Разбор ключевых концепций ModelLoader</b></summary>
+
+**1. Почему используется Promise?**
+Загрузка модели — асинхронная операция. Модель может весить несколько мегабайт, и пока она грузится, игра не должна зависать. Promise позволяет "обещать", что модель будет доставлена позже.
+
+**2. Что делает `model.traverse()`?**
+```javascript
+model.traverse((child) => {
+    if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+    }
+});
+```
+Модель — это иерархия объектов (группы, меши, кости). `traverse()` проходит по ВСЕМ дочерним элементам и включает тени для каждого меша.
+
+**3. Зачем кешировать модели в `loadedModels`?**
+Если модель уже загружена, при повторном показе мы не тратим время на повторную загрузку. Это экономит трафик и ускоряет переключение.
+
+**4. Что такое `userData`?**
+```javascript
+model.userData = {
+    id: modelInfo.id,
+    name: modelInfo.name,
+    rotationSpeed: modelInfo.rotationSpeed
+};
+```
+`userData` — специальное поле в Three.js для хранения пользовательских данных. Мы сохраняем туда метаинформацию о модели.
+
+</details>
+
+---
+
+# ЧАСТЬ 3: ИНТЕГРАЦИЯ — СОБИРАЕМ ВСЁ В MAIN.JS
+
+Теперь объединим `Settings` и `ModelLoader` в главном классе `Game`.
+
+<details>
+<summary><b>📄 Итоговый код <code>src/main.js</code> (Урок 5)</b></summary>
+
+```javascript
+import * as THREE from 'three';
+import { SceneManager } from './core/SceneManager.js';
+import { CameraManager } from './core/CameraManager.js';
+import { LightManager } from './core/LightManager.js';
+import { ModelLoader } from './core/ModelLoader.js';
+import { Settings } from './utils/Settings.js';
+import { MODELS_CONFIG } from './config/models.js';
+
+class Game {
+    constructor() {
+        this.renderer = null;
+        this.sceneManager = null;
+        this.cameraManager = null;
+        this.lightManager = null;
+        this.modelLoader = null;      // НОВОЕ!
+        this.settings = null;
+        
+        // Флаг для загрузки модели (загрузим чуть позже, после настройки сцены)
+        this.modelLoaded = false;
+
+        this.init();
+    }
+
+    async init() {  // Добавляем async для await
+        // 1. РЕНДЕРЕР
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(this.renderer.domElement);
+
+        // 2. СЦЕНА
+        this.sceneManager = new SceneManager();
+        const scene = this.sceneManager.create();
+
+        // 3. КАМЕРА
+        this.cameraManager = new CameraManager(this.renderer.domElement);
+        this.cameraManager.create();
+        this.cameraManager.createControls();
+
+        // 4. ОСВЕЩЕНИЕ
+        this.lightManager = new LightManager(scene);
+        this.lightManager.createAll();
+
+        // 5. УТИЛИТЫ ОТЛАДКИ (примитивы и помощники)
+        this.settings = new Settings(scene);
+        this.settings.createAllSettings();
+
+        // 6. ЗАГРУЗЧИК МОДЕЛЕЙ (НОВОЕ!)
+        this.modelLoader = new ModelLoader(scene);
+        
+        // Загружаем модель (асинхронно)
+        try {
+            // Показываем первую модель из конфига
+            const firstModelId = MODELS_CONFIG.models[0].id;
+            await this.modelLoader.showModel(firstModelId, MODELS_CONFIG);
+            console.log('🎉 Модель загружена и отображается!');
+        } catch (error) {
+            console.error('Не удалось загрузить модель:', error);
+        }
+
+        // 7. ТЕСТОВЫЙ ОБЪЕКТ (дополнительный тор для красоты)
+        this._addTestTorus(scene);
+
+        // 8. ОБРАБОТЧИК РЕСАЙЗА
+        window.addEventListener('resize', () => this.onWindowResize());
+
+        // 9. ЗАПУСК АНИМАЦИИ
+        this.animate();
+    }
+
+    _addTestTorus(scene) {
+        const torusGeometry = new THREE.TorusGeometry(1.5, 0.4, 32, 100);
+        const torusMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x44aa88, 
+            metalness: 0.7,
+            roughness: 0.3,
+            emissive: 0x112233
+        });
+        const torus = new THREE.Mesh(torusGeometry, torusMaterial);
+        torus.castShadow = true;
+        torus.position.set(5, 1, -3);
+        scene.add(torus);
+        this.testObject = torus;
+    }
+
+    onWindowResize() {
+        if (this.cameraManager) {
+            this.cameraManager.onWindowResize();
+        }
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    animate() {
+        requestAnimationFrame(() => this.animate());
+
+        // Обновляем все менеджеры
+        if (this.sceneManager) this.sceneManager.update();      // Звёзды мерцают
+        if (this.cameraManager) this.cameraManager.update();    // Плавность камеры
+        if (this.lightManager) this.lightManager.update();      // Свет пульсирует
+        if (this.modelLoader) this.modelLoader.update();        // Модель вращается!
+
+        // Анимация тестового тора
+        if (this.testObject) {
+            this.testObject.rotation.x += 0.008;
+            this.testObject.rotation.y += 0.012;
+        }
+
+        // Рендерим сцену
+        this.renderer.render(
+            this.sceneManager.getScene(),
+            this.cameraManager.getCamera()
+        );
+    }
+}
+
+// ЗАПУСК ИГРЫ
+const game = new Game();
+```
+</details>
+
+---
+
+## 🎨 Финальный результат
+
+После запуска ты увидишь:
+
+<div align="center">
+  <img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/screens/screen-20.png" alt="Финальный результат Урока 5" width="600"/>
+  <br>
+  <sub><strong>Результат:</strong> Сцена с примитивами и загруженной 3D-моделью</sub>
+</div>
+
+**Что теперь есть на сцене:**
+
+| Объект | Описание |
+|--------|----------|
+| 🌟 **Звёздное поле** | Мерцающие точки вдалеке |
+| 🟠 **Оранжевый куб** | BasicMaterial (всегда виден) |
+| 🟣 **Фиолетовая сфера** | Металлическая, с тенями |
+| 🔴 **Красный квадрат** | Пользовательская фигура на сетке |
+| 🌀 **Металлический тор** | Вращается, отбрасывает тени |
+| 🚀 **3D-модель корабля** | Загружена из сети, вращается |
+| 💡 **Динамический свет** | Пульсирует контровой свет |
+
+---
+
+## 🎉 Итоги Урока 5
+
+Поздравляю! Мы проделали огромную работу и научились:
+
+**1. Создавать разнообразные примитивы:**
+- Расширили `Settings.js` — теперь он создаёт куб, сферу, пользовательскую фигуру, сетку и пол
+- Использовали разные материалы: `MeshBasicMaterial` и `MeshStandardMaterial`
+- Познакомились с `BufferGeometry` для создания собственных фигур
+
+**2. Загружать сложные 3D-модели:**
+- Создали `ModelLoader.js` с поддержкой асинхронной загрузки
+- Настроили кеширование моделей для быстрого переключения
+- Добавили автоматическую настройку теней для всех мешей модели
+
+**3. Организовали код:**
+- Конфиг моделей вынесен в отдельный файл
+- ModelLoader отвечает только за модели
+- Примитивы остались в Settings
+
+**4. Интегрировали всё в игровой цикл:**
+- Модель вращается с заданной скоростью
+- Все менеджеры обновляются каждый кадр
+
+---
+
+## 🚀 Что дальше? Возможные улучшения:
+
+1. **Добавить UI для переключения моделей** — кнопки "Предыдущая/Следующая модель"
+2. **Создать анимацию загрузки** — спиннер, пока модель грузится
+3. **Добавить звук** — гул двигателя при появлении корабля
+4. **Настроить камеру, следящую за моделью** — эффект "преследования"
+5. **Добавить несколько моделей одновременно** — целый флот!
+
+---
+
+<div align="center">
+
+От простого куба до сложной 3D-модели — пройден важный этап. Твоя сцена готова к наполнению!
+
+---
+
+[⬆ К началу урока 5](#-threejs-3d-game--урок-5)
+
+</div>
+
+</details>
+
+![divider](https://github.com/Gabryelf/Atlas-Assets/raw/main/docs/animations/gifs-line/pulse-grey.gif)
+
+
+
+
+
 
