@@ -4,12 +4,28 @@ export const TEXTURES_CONFIG = {
             '../../textures/disc.png'
         ],
         ship :[
-            "../../textures/space-cruiser-panels2_albedo.png",
-            "../../textures/space-cruiser-panels2_ao.png",
-            "../../textures/space-cruiser-panels2_metallic.png",
-            "../../textures/space-cruiser-panels2_roughness.png",
-            "../../textures/space-cruiser-panels2_normal-ogl.png",
-            "../../textures/space-cruiser-panels2_height.png"
+            "../../textures/armor-hex/space-cruiser-panels2_albedo.png",
+            "../../textures/armor-hex/space-cruiser-panels2_ao.png",
+            "../../textures/armor-hex/space-cruiser-panels2_metallic.png",
+            "../../textures/armor-hex/space-cruiser-panels2_roughness.png",
+            "../../textures/armor-hex/space-cruiser-panels2_normal-ogl.png",
+            "../../textures/armor-hex/space-cruiser-panels2_height.png"
+        ],
+        armor_plating:[
+            "../../textures/armor-plating/armor-plating1_albedo.png",
+            "../../textures/armor-plating/armor-plating1_ao.png",
+            "../../textures/armor-plating/armor-plating1_metallic.png",
+            "../../textures/armor-plating/armor-plating1_roughness.png",
+            "../../textures/armor-plating/armor-plating1_normal-ogl.png",
+            "../../textures/armor-plating/armor-plating1_height.png"
+        ],
+        cratered_rock: [
+            "../../textures/cratered-rock/armor-plating1_albedo.png",
+            "../../textures/cratered-rock/armor-plating1_ao.png",
+            "../../textures/cratered-rock/armor-plating1_metallic.png",
+            "../../textures/cratered-rock/armor-plating1_roughness.png",
+            "../../textures/cratered-rock/armor-plating1_normal-ogl.png",
+            "../../textures/cratered-rock/armor-plating1_height.png"
         ]
     },
     textureOptions : {

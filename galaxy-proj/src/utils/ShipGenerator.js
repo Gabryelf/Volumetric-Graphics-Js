@@ -20,10 +20,11 @@ export class ShipGenerator{
             type = SHIP_CONFIG.type.combat;
         }
         this.ship = new THREE.Group();
+        this.ship.name = 'cruiser';
         this.ship.position.set(0,0,0);
         this.ship.scale.set(type.scale.x, type.scale.y, type.scale.z);
         const cabine = this.partsShip.addCabin();
-        cabine.position.z = type.scale.z - type.scale.z / 2;
+        cabine.position.z = this.ship.position.z + 2;
         this.ship.add(cabine);
         this.scene.add(this.ship);
     }

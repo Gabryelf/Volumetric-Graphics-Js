@@ -6,7 +6,7 @@ import { Settings } from './utils/Settings.js';
 import { ModelLoader } from './core/ModelLoader.js';
 import { MODELS_CONFIG } from './config/model.js';
 import {ShipGenerator} from './utils/ShipGenerator.js'
-import {Pane} from 'tweakpane';
+import {PaneConstructor} from './utils/PaneConstructor.js';
 
 class Game {
     constructor() {
@@ -61,13 +61,8 @@ class Game {
 
         this.clock = new THREE.Clock();
 
-        this.pane = new Pane();
-        this.pane.addBinding(this.ship.scale, 'x', {
-            min: 0,
-            max: 10,
-            step: 0.1,
-            label: 'Scale X'
-        })
+        this.pane = new PaneConstructor();
+        this.pane.createAll(this.ship.children[0]);
 
         window.addEventListener('resize', () => this.onWindowResize());
 
@@ -91,7 +86,7 @@ class Game {
         const delta = currentTime - this.prevTime;
         this.prevTime = currentTime;
 
-        this.ship.rotation.y += THREE.MathUtils.degToRad(1) * delta * 20;
+        this.ship.children[0].rotation.y += THREE.MathUtils.degToRad(1) * delta * 20;
         
         this.renderer.render(
             this.sceneManager.getScene(),
