@@ -12,7 +12,6 @@ export class PaneConstructor{
         this._createRotationPane(obj);
         this._createTextureOptions(obj);
         this._createMaterialOptions(obj);
-        console.log(obj);
     }
 
     addPaneFolder(title, expand){
@@ -127,4 +126,110 @@ export class PaneConstructor{
             label: 'height'
         });
     }
+}
+
+export class PaneLights{
+    constructor(){
+        this.pane = new Pane();
+    }
+
+    createAll(obj1, obj2, obj3){
+       this._createPaneAmbient(obj1);
+       this._createPaneMain(obj2);
+       this._createPaneRim(obj3);
+    }
+
+    addPaneFolder(title, expand){
+        const folder = this.pane.addFolder({
+            title: `${title}`,
+            expanded: expand,
+        });
+        return folder;
+    }
+
+    _createPaneAmbient(obj){
+        const folderPane = this.addPaneFolder(`${obj.name} ambient`, false);
+        folderPane.addBinding(obj, 'intensity', {
+            min: 0,
+            max: 1,
+            step: 0.01,
+            label: 'intensity'
+        });
+        folderPane.addBinding(obj.scale, 'x', {
+            min: 0,
+            max: 100,
+            step: 0.1,
+            label: 'scale x'
+        });
+        folderPane.addBinding(obj.scale, 'y', {
+            min: 0,
+            max: 100,
+            step: 0.1,
+            label: 'scale y'
+        });
+        folderPane.addBinding(obj.scale, 'z', {
+            min: 0,
+            max: 100,
+            step: 0.1,
+            label: 'scale z'
+        });
+    }
+
+    _createPaneMain(obj){
+        const folderPane = this.addPaneFolder(`${obj.name} main`, false);
+        folderPane.addBinding(obj, 'intensity', {
+            min: 0,
+            max: 1,
+            step: 0.01,
+            label: 'intensity'
+        });
+        folderPane.addBinding(obj.scale, 'x', {
+            min: 0,
+            max: 100,
+            step: 0.1,
+            label: 'scale x'
+        });
+        folderPane.addBinding(obj.scale, 'y', {
+            min: 0,
+            max: 100,
+            step: 0.1,
+            label: 'scale y'
+        });
+        folderPane.addBinding(obj.scale, 'z', {
+            min: 0,
+            max: 100,
+            step: 0.1,
+            label: 'scale z'
+        });
+    }
+
+    _createPaneRim(obj){
+        const folderPane = this.addPaneFolder(`${obj.name} rim`, false);
+        folderPane.addBinding(obj, 'intensity', {
+            min: 0,
+            max: 1,
+            step: 0.01,
+            label: 'intensity'
+        });
+        folderPane.addBinding(obj.scale, 'x', {
+            min: 0,
+            max: 100,
+            step: 0.1,
+            label: 'scale x'
+        });
+        folderPane.addBinding(obj.scale, 'y', {
+            min: 0,
+            max: 100,
+            step: 0.1,
+            label: 'scale y'
+        });
+        folderPane.addBinding(obj.scale, 'z', {
+            min: 0,
+            max: 100,
+            step: 0.1,
+            label: 'scale z'
+        });
+    }
+
+
 }

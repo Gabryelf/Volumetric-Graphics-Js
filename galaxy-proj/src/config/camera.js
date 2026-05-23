@@ -26,7 +26,7 @@ export const CAMERA_CONFIG = {
     },
     
     // === НАСТРОЙКИ УПРАВЛЕНИЯ ===
-    controls: {
+    orbit_controls: {
         enableDamping: true,    // плавность (инерция)
         dampingFactor: 0.05,    // сила инерции
         autoRotate: false,      // автоматическое вращение
@@ -34,5 +34,12 @@ export const CAMERA_CONFIG = {
         enablePan: true,        // разрешить панорамирование
         zoomSpeed: 1.2,         // скорость зума
         rotateSpeed: 1.0        // скорость вращения
+    },
+
+    fly_controls: {
+        ovementSpeed: 2,
+        rollSpeed: 0.5,
+        autoForward: true,
+        dragToLook: true
     }
 };
