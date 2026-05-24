@@ -1,5 +1,6 @@
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MODELS_CONFIG} from "../config/model.js"
+import { PARTS_CONFIG } from '../config/parts_model.js';
 import {TextureLoader} from '../core/TextureLoader.js'
 
 export class ModelLoader{
@@ -20,9 +21,13 @@ export class ModelLoader{
             if (id === 'assault') {
                 url = MODELS_CONFIG.ships[1].url;
             }
+            if (id === 'freighter') {
+                url = MODELS_CONFIG.ships[2].url;
+            }
             if (id === 'asteroid') {
                 url = MODELS_CONFIG.body[0].url;
             }
+
             
             gltfLoader.load(url, 
                 (gltf) => {
@@ -40,8 +45,8 @@ export class ModelLoader{
                         });
                     }
                     this.model.position.set(0, 0, 0);
-                    this.model.rotation.set(0, 0, 0);
-                        
+                    //this.model.rotation.set(0, 0, 0);   
+                    this.model.rotation.y = Math.PI / 2;                    
                     
                     this.scene.add(gltf.scene);
                     resolve(this.model);
@@ -54,6 +59,47 @@ export class ModelLoader{
                     reject(error);
                 }
             );
+        });
+    }
+
+    async loadPart(id) {
+        return new Promise((resolve, reject) => {
+            const gltfLoader = new GLTFLoader();
+            let url = id === 'cabine' ? PARTS_CONFIG.cabines[0] : null;
+           
+            gltfLoader.load(url, (gltf) => {
+                this.model = gltf.scene; 
+    
+                // Получаем текстуру и СОХРАНЯЕМ в переменную
+                let texture = this.textureLoader.load(0, 'ship');
+                console.log(texture)
+    
+                // Применяем ко всем мешам
+                this.model.traverse((child) => {
+                    if (child.isMesh && child.material) {
+                        const materials = Array.isArray(child.material) 
+                            ? child.material 
+                            : [child.material];
+                        
+                        materials.forEach(mat => {
+                            mat.map = texture;
+                            mat.needsUpdate = true;
+                        });
+                    }
+                });
+    
+                // 🔹 3. Финальная настройка
+                this.model.position.set(0, 0, 0);
+                this.model.rotation.y = Math.PI / 2;
+                
+                resolve(this.model);
+                
+            }, 
+            (progress) => console.log('Progress:', progress.loaded / progress.total * 100 + '%'),
+            (error) => {
+                console.error('Error:', error);
+                reject(error);
+            });
         });
     }
     

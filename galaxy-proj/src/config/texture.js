@@ -20,12 +20,12 @@ export const TEXTURES_CONFIG = {
             "../../textures/armor-plating/armor-plating1_height.png"
         ],
         cratered_rock: [
-            "../../textures/cratered-rock/armor-plating1_albedo.png",
-            "../../textures/cratered-rock/armor-plating1_ao.png",
-            "../../textures/cratered-rock/armor-plating1_metallic.png",
-            "../../textures/cratered-rock/armor-plating1_roughness.png",
-            "../../textures/cratered-rock/armor-plating1_normal-ogl.png",
-            "../../textures/cratered-rock/armor-plating1_height.png"
+            "../../textures/cratered-rock/cratered-rock-albedo.png",
+            "../../textures/cratered-rock/cratered-rock-ao.png",
+            "../../textures/cratered-rock/cratered-rock-metalness.png",
+            "../../textures/cratered-rock/cratered-rock-roughness.png",
+            "../../textures/cratered-rock/cratered-rock-normal-ogl.png",
+            "../../textures/cratered-rock/cratered-rock-height.png"
         ]
     },
     textureOptions : {

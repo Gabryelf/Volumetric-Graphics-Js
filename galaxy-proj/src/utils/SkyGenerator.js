@@ -94,4 +94,6 @@ export class SkyGenerator{
         const particles = new THREE.Points( geometry, material);
         this.scene.add( particles );
     }
+
+    
 }

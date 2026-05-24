@@ -11,7 +11,15 @@ export const MODELS_CONFIG = {
         {
             id: 'assault',
             name: 'Штурмовой корабль',
-            url: 'https://raw.githubusercontent.com/Gabryelf/Atlas-Assets/main/docs/models/ships/scout.glb',
+            url: 'https://raw.githubusercontent.com/Gabryelf/Atlas-Assets/main/docs/models/ships/assault.glb',
+            color: 0xff4444,
+            scale: 1.0,
+            rotationSpeed: 0.005
+        },
+        {
+            id: 'freighter',
+            name: 'Штурмовой корабль',
+            url: 'https://raw.githubusercontent.com/Gabryelf/Atlas-Assets/main/docs/models/ships/freighter.glb',
             color: 0xff4444,
             scale: 1.0,
             rotationSpeed: 0.005

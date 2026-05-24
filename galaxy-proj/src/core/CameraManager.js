@@ -9,7 +9,7 @@ export class CameraManager {
         this.controls = null;
         this.ship = null;
         this.shipFollowsCamera = false;
-        this.cameraOffset = new THREE.Vector3(0, 4, -15);
+        this.cameraOffset = new THREE.Vector3(0, 1, 1);
         this.rendererDomElement = rendererDomElement;
     }
 
@@ -83,10 +83,11 @@ export class CameraManager {
         if (ship) {
             this.ship = ship;
             this.shipFollowsCamera = true;
-            
-            // ставим камеру в стартовую позицию относительно корабля
-            this.camera.position.copy(this.cameraOffset);
-            this.camera.lookAt(this.camera.position.clone().add(new THREE.Vector3(0, 0, 1)));
+    
+            // ✅ Позиционируем камеру ОТНОСИТЕЛЬНО корабля
+            this.camera.position.copy(this.ship.position).add(this.cameraOffset);
+            this.camera.lookAt(this.ship.position); // Смотрим на корабль
+
         }
         return this.controls;
     }
@@ -106,9 +107,10 @@ export class CameraManager {
             this.ship.lookAt(lookTarget);
             
             // Позиция корабля: летит "в хвосте" камеры с плавным отставанием (инерция)
-            const targetShipPos = this.camera.position.clone().add(direction.clone().multiplyScalar(-8));
+            const targetShipPos = this.camera.position.clone().add(direction.clone().multiplyScalar(58));
             this.ship.position.lerp(targetShipPos, 0.08); // 0.08 = плавность следования
         }
+
     }
 
 
@@ -131,4 +133,5 @@ export class CameraManager {
             this.controls = null;
         }
     }
+
 }
