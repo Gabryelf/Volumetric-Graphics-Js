@@ -1,7 +1,13 @@
 # Multi Lessons
 ## `Практические уроки по изучению javascript и работы с ним в рамках объемной графики`
 
+<div align="center">
+  
 ## 🌟 JavaScript & Three.js
+
+<img src="https://github.com/Gabryelf/Volumetric-Graphics-Js/blob/main/docs/intro/2026-05-25_16-38-42.png" width="400" alt="Dragon animation"/>
+
+</div>
 
 <!-- Кнопки -->
 <p align="center">
