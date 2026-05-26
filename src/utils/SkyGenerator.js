@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { SCENE_CONFIG } from '../config/scene.js';
-import {TexturesLoader} from '../core/TextureLoader.js'
+import {TextureLoader} from '../core/TextureLoader.js'
 
 export class SkyGenerator{
     constructor(scene){
-        this.textureLoader = new TexturesLoader();
+        this.textureLoader = new TextureLoader();
         this.scene = scene;
         this.stars = null;
     }
@@ -19,7 +19,7 @@ export class SkyGenerator{
         const geometry = new THREE.BufferGeometry();
 		const vertices = [];
 
-        const sprite = new THREE.TextureLoader().load( '../../textures/disc.png' );
+        const sprite = new THREE.TextureLoader().load(0, 'sky');
         sprite.colorSpace = THREE.SRGBColorSpace;
 
         for ( let i = 0; i < 100; i ++ ) {
@@ -66,7 +66,7 @@ export class SkyGenerator{
     }
 
     _createModStars(){
-        const sprite = this.textureLoader.load(0);
+        const sprite = this.textureLoader.load(0, 'sky');
         const geometry = new THREE.BufferGeometry();
 		const vertices = [];
 

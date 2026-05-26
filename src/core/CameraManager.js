@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { FlyControls } from 'three/addons/controls/FlyControls.js';
 import { CAMERA_CONFIG } from '../config/camera.js';
 
 export class CameraManager {
@@ -7,6 +8,8 @@ export class CameraManager {
         this.camera = null;
         this.controls = null;
         this.rendererDomElement = rendererDomElement;
+
+        this.followShip = null;
     }
 
     create() {
@@ -32,7 +35,7 @@ export class CameraManager {
         return this.camera;
     }
    
-    createControls(){
+    createOrbitControls(){
         const {
             enableDamping, dampingFactor, autoRotate, 
             enableZoom, zoomSpeed, rotateSpeed} = CAMERA_CONFIG.controls;
@@ -55,9 +58,18 @@ export class CameraManager {
         return this.controls;
     }
 
-    update(){
+    createFlyControls(){
+        this.controls = new FlyControls(this.camera, this.rendererDomElement);
+
+		this.controls.movementSpeed = 5;
+		this.controls.rollSpeed = Math.PI / 6;
+		this.controls.autoForward = false;
+		this.controls.dragToLook = false;
+    }
+
+    update(delta){
         if(this.controls){
-            this.controls.update();
+            this.controls.update(delta);
         }
     }
 
@@ -73,4 +85,5 @@ export class CameraManager {
     getControls(){
         return this.controls;
     }
+
 }
