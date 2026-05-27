@@ -7,6 +7,7 @@ import {ShipGenerator} from "./utils/ShipGenerator.js"
 import {SkySettings} from "./utils/SkySettings.js"
 import {ModelLoader} from "./core/ModelLoader.js"
 import { PaneConstructor } from './utils/PaneConstructor.js';
+import {AsteroidManager} from './core/AsteroidManager.js'
 
 
 class Main{
@@ -27,6 +28,7 @@ class Main{
 
         this.ship = null;
 
+        this.asteroidManager = null;
         this.asteroid = null;
 
         this.paneConstructor = null;
@@ -68,15 +70,17 @@ class Main{
             this.cameraManager.create(this.ship);
             //this.cameraManager.createFlyControls();
             this.cameraManager.createOrbitControls(this.ship);
+            this.asteroidManager = new AsteroidManager(scene, this.ship);
         }, 500)
 
         setTimeout(()=> {
-            this.modelLoader.load(3);
+            //this.modelLoader.load(3);
+            
         }, 1000)     
 
         setTimeout(()=> {
-            this.asteroid = this.modelLoader.model
-            this.asteroid.position.x = 5;
+            //this.asteroid = this.modelLoader.model
+            //this.asteroid.position.x = 5;
         }, 4000)   
 
         this.clock = new THREE.Clock();
@@ -96,11 +100,20 @@ class Main{
                 this.ship.rotation.y += 0.01;
                 this.ship.rotation.x += 0.01;
             }
+
+            if(event.key === 's'){
+                this.ship.rotation.z -= 0.02;
+                this.ship.position.y -= 0.02;
+            }
+
+            if(event.key === 'w'){
+                this.ship.rotation.z += 0.02;
+                this.ship.position.y += 0.02;
+            }
         })
 
         this.animate();
     }
-
     
     onWindowResize(){
         this.cameraManager.onWindowResize();
@@ -111,26 +124,31 @@ class Main{
         requestAnimationFrame(() => this.animate());
 
         const delta = this.clock.getDelta();
-        
-        this.cameraManager.update(this.ship, delta);
 
         if(this.ship){
+            this.cameraManager.update(this.ship, delta);
             this.ship.position.z += 0.01;
         }
 
-
-        if(this.asteroid && this.ship){  // есть ли астероид и корабль, если есть проверяем дистанцию
-            if(this.ship.position.distanceTo(this.asteroid.position) < 1){ 
-                this.sceneManager.scene.remove(this.asteroid);
-                this.asteroid = null;
-            }
+        if(this.asteroidManager){
+            this.asteroidManager.updateAsteroids();
         }
 
-        this.renderer.render(
-            this.sceneManager.getScene(),
-            this.cameraManager.getCamera(),
-            this.camera = this.cameraManager.getCamera()
-        )
+
+        //if(this.asteroid && this.ship){  // есть ли астероид и корабль, если есть проверяем дистанцию
+        //    if(this.ship.position.distanceTo(this.asteroid.position) < 1){ 
+        //        this.sceneManager.scene.remove(this.asteroid);
+        //        this.asteroid = null;
+        //    }
+        //}
+        if(this.cameraManager){
+            this.renderer.render(
+                this.sceneManager.getScene(),         
+                this.cameraManager.getCamera(),
+                this.camera = this.cameraManager.getCamera()
+            )
+        }
+        
     }
 }
 
