@@ -8,6 +8,7 @@ import { MODELS_CONFIG } from './config/model.js';
 import {ShipGenerator} from './utils/ShipGenerator.js'
 import { Ship } from './entities/Ship.js';
 import { AsteroidManager } from './utils/AsteroidManager.js';
+import { UIHelper } from './ui/UIHelper.js';
 import {Pane} from 'tweakpane';
 
 class Game {
@@ -29,6 +30,9 @@ class Game {
 
         this.clock = null;
         this.pane = null;
+
+        this.ui = null;
+        this.gameOver = false;
 
         this.init();
 
@@ -76,6 +80,8 @@ class Game {
         
         // Таймер
         this.clock = new THREE.Clock();
+
+        this.ui = new UIHelper();
         
         // События
         window.addEventListener('resize', () => this.onWindowResize());
@@ -116,13 +122,22 @@ class Game {
        // Обновляем астероиды
        this.asteroidManager.update();
        
-       // Проверка коллизий
-       const shipPosition = this.ship.getPosition();
-       this.asteroidManager.checkCollisions(shipPosition, (asteroid) => {
-           // Эффект при столкновении
-           this.ship.rotate(0.3, 0.3, 0.3);
-           console.log('Collision! Asteroids left:', this.asteroidManager.getCount());
-       });
+       // Обновляем UI
+         this.ui.updateHealth(this.ship.getHealth(), this.ship.getMaxHealth());
+
+        // ТОЛЬКО ОДНА ПРОВЕРКА КОЛЛИЗИЙ - передаем ship объект
+        this.asteroidManager.checkCollisions(this.ship, (asteroid, remainingHp) => {
+        // Эффект при столкновении
+            this.ship.rotate(0.3, 0.3, 0.3);
+            console.log('Collision! HP left:', remainingHp);
+        
+            // Проверка на Game Over
+            if (remainingHp <= 0) {
+                 this.gameOver = true;
+                this.ui.showGameOver();
+                console.log('GAME OVER! Корабль уничтожен');
+            }
+        });
 
         this.renderer.render(
             this.sceneManager.getScene(),

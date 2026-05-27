@@ -10,6 +10,7 @@ export class AsteroidManager {
         this.spawnInterval = 2000; // Интервал спавна в мс
         this.maxAsteroids = 10;
         this.spawnTimer = null;
+        this.damageAmount = 10;
     }
 
     start() {
@@ -57,21 +58,28 @@ export class AsteroidManager {
         }
     }
 
-    checkCollisions(shipPosition, onCollision) {
-        for (let i = this.asteroids.length - 1; i >= 0; i--) {
+    checkCollisions(ship, onCollision) {
+        for (let i = 0; i < this.asteroids.length; i++) {
             const asteroid = this.asteroids[i];
+
+            const shipPos = ship.getPosition();
             
-            if (asteroid.checkCollision(shipPosition, 5)) {
+            const distance = asteroid.model.position.distanceTo(shipPos);
+            
+            if (distance < 5) {
                 asteroid.destroy();
                 this.asteroids.splice(i, 1);
                 
+                const remainingHp = ship.takeDamage(this.damageAmount);
+                
                 if (onCollision) {
-                    onCollision(asteroid);
+                    onCollision(asteroid, remainingHp);
                 }
                 
                 return true;
             }
         }
+        
         return false;
     }
 
