@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+﻿import * as THREE from 'three';
 import {LIGHTS_CONFIG} from "../config/light.js";
 
 export class LightManager {
@@ -8,32 +8,26 @@ export class LightManager {
     }
     
     createAll(){
-        this._createAmbientLight();
         this._createMainLight();
-        this._createPointLight();
+        return this.lights;
     }
     
     _createMainLight(){
-        const config = LIGHTS_CONFIG.main;
-        const light = new THREE.DirectionalLight(config.color, config.intensity);
+        const config = LIGHTS_CONFIG.main
+        const light = 
+            new THREE.DirectionalLight(config.color, config.intensity);
+        light.position.set(config.position.x, config.position.y, config.position.z);
+        
+        if(config.castShadow){
+            light.castShadow = true;
+            light.shadow.mapSize.with = config.shadowMapSize;
+            light.shadow.mapSize.height = config.shadowMapSize;
+            
+            light.shadow.camera.near = 0.5;
+            light.shadow.camera.far = 20;
+        }
         this.scene.add(light);
         this.lights.main = light;
-    }
-    
-    _createAmbientLight(){
-        const config = LIGHTS_CONFIG.ambient;
-        const light = new THREE.AmbientLight(config.color, config.intensity);
-        this.scene.add(light);
-        this.lights.ambient = light;
-        
-    }
-    
-    _createPointLight(){
-        const config = LIGHTS_CONFIG.ambient;
-        const light = new THREE.PointLight(config.color, config.intensity);
-        light.position.add(new THREE.Vector3(0.5, 0.5, 0.5));
-        this.scene.add(light);
-        this.lights.point = light;
     }
     
     getLight(name){

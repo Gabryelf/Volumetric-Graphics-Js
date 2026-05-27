@@ -1,15 +1,28 @@
 {
-  "name": "three",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "name": "galaxy-proj",
+  "version": "0.0.6",
+  "description": "<!--\r   ИТОГОВЫЙ ЭКЗАМЕН: Fullstack Мультиплеерная игра\r   Дисциплина: Веб-разработка / Технологии интерактивных систем\r   Преподаватель: [@Gabryelf - Валеев Сергей]\r -->",
+  "private": true,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gabryelf/Volumetric-Graphics-Js.git"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
-  "description": "",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^8.0.12"
+  },
+  "bugs": {
+    "url": "https://github.com/Gabryelf/Volumetric-Graphics-Js/issues"
+  },
+  "homepage": "https://github.com/Gabryelf/Volumetric-Graphics-Js#readme",
   "dependencies": {
-    "three": "^0.184.0"
+    "three": "^0.184.0",
+    "tweakpane": "^4.0.5"
   }
 }

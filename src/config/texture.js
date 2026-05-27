@@ -1,12 +1,20 @@
-export const TEXTURES_CONFIG = {
+﻿export const TEXTURES_CONFIG = {
     url: {
-        ship: {
-            albedo: '../../textures/futuristic-hex-armor_albedo.png',
-            ao: '../../textures/futuristic-hex-armor_ao.png',
-            metallic: '../../textures/futuristic-hex-armor_metallic.png',
-            roughness: '../../textures/futuristic-hex-armor_roughness.png',
-            normal: '../../textures/futuristic-hex-armor_normal-ogl.png',
-            height: '../../textures/futuristic-hex-armor_height.png'
+        'hex-armor': {
+            albedo: '../../textures/hex-armor/futuristic-hex-armor_albedo.png',
+            ao: '',
+            metallic: '',
+            roughness: '',
+            normal: '',
+            height: ''
+        },
+        'rock': {
+            albedo: '../../textures/rock/wet-mossy-rocks_albedo.png',
+            ao: '../../textures/rock/wet-mossy-rocks_ao.png',
+            metallic: '../../textures/rock/wet-mossy-rocks_metallic.png',
+            roughness: '../../textures/rock/wet-mossy-rocks_roughness.png',
+            normal: '../../textures/rock/wet-mossy-rocks_normal-ogl.png',
+            height: '../../textures/rock/wet-mossy-rocks_height.png'
         }
     }
 }
