@@ -127,7 +127,7 @@ class Main{
 
         if(this.ship){
             this.cameraManager.update(this.ship, delta);
-            this.ship.position.z += 0.01;
+            this.ship.position.z += 0.03;
         }
 
         if(this.asteroidManager){

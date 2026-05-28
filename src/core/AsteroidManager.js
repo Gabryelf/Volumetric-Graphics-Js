@@ -7,17 +7,18 @@ export class AsteroidManager{
         this.ship = ship;
         this.asteroids = [];
         this.materialManager = new MaterialManager();
+        this.chank_length = 20;
 
         this.spawnAsteroids();
     }
 
     spawnAsteroids(){
-        for(let i = 0; i < 10; i++){
+        for(let i = 0; i < (this.chank_length / 2); i++){
             setTimeout(() => {
                 const shipPosition = this.getPosition();
                 
                 // Добавляем случайное смещение в радиусе 5-15 единиц
-                const offsetX = (Math.random() - 0.5) * 2;  
+                const offsetX = (Math.random() - 0.5) * 100;  
                 const offsetY = (Math.random() - 0.5) * 0.5;  
                 const offsetZ = (Math.random() - 0.5) * 100;  
 
@@ -39,15 +40,25 @@ export class AsteroidManager{
     }
 
     createAsteroid(){
-        const geometry = new THREE.SphereGeometry(1, 16, 16);
-        const material = this.materialManager.createMaterial('rock');
+        const geometry = new THREE.SphereGeometry(1, 32, 32);
+        const material = this.materialManager.createMaterial('cratered_rock');
         const mesh = new THREE.Mesh(geometry, material);
         return mesh;
     }
 
     updateAsteroids(){
+        if(this.asteroids.length === 0){
+            //this.spawnAsteroids();
+        }
         for(let i = 0; i < this.asteroids.length; i++){
-            //this.asteroids[i].position.z += 0.01;
+            if(this.asteroids[i].position.distanceTo(this.ship.position) > this.chank_length){
+                this.scene.remove(this.asteroids[i]);
+                this.asteroids.splice(i, 1);
+            }
+            else{
+                this.asteroids[i].rotation.z -= 0.005;
+                this.asteroids[i].rotation.x -= 0.01;
+            }
         }
     }
 }
