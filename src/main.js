@@ -8,6 +8,7 @@ import {SkySettings} from "./utils/SkySettings.js"
 import {ModelLoader} from "./core/ModelLoader.js"
 import { PaneConstructor } from './utils/PaneConstructor.js';
 import {AsteroidManager} from './core/AsteroidManager.js'
+import {Ship} from './entities/Ship.js'
 
 
 class Main{
@@ -55,60 +56,45 @@ class Main{
         
         this.skySettings = new SkySettings(scene);
         this.skySettings.createStars();
-        
-        this.shipGenerator = new ShipGenerator(scene);
-        //this.shipGenerator.createShip('scout');
-        //this.model = this.shipGenerator.ship
-        
+
         this.modelLoader = new ModelLoader(scene);
-        this.modelLoader.load(0);
+        //this.modelLoader.load(0);
+        this.ship = new Ship(this.modelLoader, 0);
+        console.log(this.ship)
 
         setTimeout(()=> {
-            this.ship = this.modelLoader.model
+            this.model = this.modelLoader.model;
+            //this.ship = this.modelLoader.model
             this.modelLoader.model = null;
             this.cameraManager = new CameraManager(this.renderer.domElement);
-            this.cameraManager.create(this.ship);
+            this.cameraManager.create(this.model);
             //this.cameraManager.createFlyControls();
-            this.cameraManager.createOrbitControls(this.ship);
-            this.asteroidManager = new AsteroidManager(scene, this.ship);
-        }, 500)
-
-        setTimeout(()=> {
-            //this.modelLoader.load(3);
-            
-        }, 1000)     
-
-        setTimeout(()=> {
-            //this.asteroid = this.modelLoader.model
-            //this.asteroid.position.x = 5;
-        }, 4000)   
+            this.cameraManager.createOrbitControls(this.model);
+            this.asteroidManager = new AsteroidManager(scene, this.model, this.ship);
+        }, 500)  
 
         this.clock = new THREE.Clock();
 
-        this.paneConstructor = new PaneConstructor(scene);
-
-        //setTimeout(() => {this.model = this.modelLoader.model; this.model.name = 'Model';this.paneConstructor.addAllPanels(this.model);}, 500);
-        
         window.addEventListener('resize', () => this.onWindowResize());
 
         window.addEventListener('keydown', (event) => {
             if(event.key === 'a'){
-                this.ship.rotation.y -= 0.01;
-                this.ship.rotation.x -= 0.01;
+                this.model.rotation.y -= 0.01;
+                this.model.rotation.x -= 0.01;
             }
             if(event.key === 'd'){
-                this.ship.rotation.y += 0.01;
-                this.ship.rotation.x += 0.01;
+                this.model.rotation.y += 0.01;
+                this.model.rotation.x += 0.01;
             }
 
             if(event.key === 's'){
-                this.ship.rotation.z -= 0.02;
-                this.ship.position.y -= 0.02;
+                this.model.rotation.z -= 0.02;
+                this.model.position.y -= 0.02;
             }
 
             if(event.key === 'w'){
-                this.ship.rotation.z += 0.02;
-                this.ship.position.y += 0.02;
+                this.model.rotation.z += 0.02;
+                this.model.position.y += 0.02;
             }
         })
 
@@ -125,22 +111,15 @@ class Main{
 
         const delta = this.clock.getDelta();
 
-        if(this.ship){
-            this.cameraManager.update(this.ship, delta);
-            this.ship.position.z += 0.03;
+        if(this.model){
+            this.cameraManager.update(this.model, delta);
+            this.model.position.z += 0.03;
         }
 
         if(this.asteroidManager){
             this.asteroidManager.updateAsteroids();
         }
 
-
-        //if(this.asteroid && this.ship){  // есть ли астероид и корабль, если есть проверяем дистанцию
-        //    if(this.ship.position.distanceTo(this.asteroid.position) < 1){ 
-        //        this.sceneManager.scene.remove(this.asteroid);
-        //        this.asteroid = null;
-        //    }
-        //}
         if(this.cameraManager){
             this.renderer.render(
                 this.sceneManager.getScene(),         

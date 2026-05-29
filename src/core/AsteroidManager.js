@@ -2,24 +2,25 @@ import * as THREE from 'three';
 import {MaterialManager} from './MaterialManager.js'
 
 export class AsteroidManager{
-    constructor(scene, ship){
+    constructor(scene, ship_model, ship_obj){
         this.scene = scene;
-        this.ship = ship;
+        this.ship = ship_model;
+        this.ship_obj = ship_obj;
         this.asteroids = [];
         this.materialManager = new MaterialManager();
-        this.chank_length = 20;
+        this.chank_length = 100;
 
         this.spawnAsteroids();
     }
 
     spawnAsteroids(){
-        for(let i = 0; i < (this.chank_length / 2); i++){
+        for(let i = 0; i < (this.chank_length / 3); i++){
             setTimeout(() => {
                 const shipPosition = this.getPosition();
                 
-                // Добавляем случайное смещение в радиусе 5-15 единиц
+                // Добавляем случайное смещение в радиусе 
                 const offsetX = (Math.random() - 0.5) * 100;  
-                const offsetY = (Math.random() - 0.5) * 0.5;  
+                const offsetY = (Math.random() - 0.5) * 10;  
                 const offsetZ = (Math.random() - 0.5) * 100;  
 
                 const asteroid = this.createAsteroid();
@@ -30,7 +31,6 @@ export class AsteroidManager{
                     shipPosition.z + offsetZ
                 );
                 this.scene.add(asteroid);
-                console.log(asteroid)
             }, Math.random(500, 2500));
         }
     }
@@ -47,17 +47,29 @@ export class AsteroidManager{
     }
 
     updateAsteroids(){
-        if(this.asteroids.length === 0){
-            //this.spawnAsteroids();
+        if(this.asteroids.length < 25){
+            this.spawnAsteroids();
         }
         for(let i = 0; i < this.asteroids.length; i++){
+            //position fly & remove exit zone
             if(this.asteroids[i].position.distanceTo(this.ship.position) > this.chank_length){
                 this.scene.remove(this.asteroids[i]);
                 this.asteroids.splice(i, 1);
             }
             else{
                 this.asteroids[i].rotation.z -= 0.005;
-                this.asteroids[i].rotation.x -= 0.01;
+                this.asteroids[i].rotation.x -= 0.005;
+
+                this.asteroids[i].position.x -= 0.05;
+                this.asteroids[i].position.z -= 0.05;
+                
+            }
+            //collision
+            if(this.asteroids[i].position.distanceTo(this.ship.position) < 5){
+                this.ship_obj.hp -= 10;
+                console.log(this.ship_obj.hp)
+                this.scene.remove(this.asteroids[i]);
+                this.asteroids.splice(i, 1);
             }
         }
     }

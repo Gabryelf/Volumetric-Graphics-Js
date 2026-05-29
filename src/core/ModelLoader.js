@@ -17,7 +17,6 @@ export class ModelLoader {
             ( gltf ) => {
                 this.model = gltf.scene;
                 //this.model.position.set(this.positions.x, this.positions.y, this.positions.z);
-                this._updatePosition();
                 this.scene.add( this.model );
         });
         

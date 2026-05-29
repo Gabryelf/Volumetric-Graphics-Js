@@ -26,8 +26,9 @@ export class SkySettings {
 
         geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
 
-        const material = new THREE.PointsMaterial( { size: 5, sizeAttenuation: true, map: sprite, alphaTest: 0.5, transparent: true } );
+        const material = new THREE.PointsMaterial( { size: 3, sizeAttenuation: true, map: sprite, alphaTest: 0.5, transparent: true } );
         material.color.set(250, 250, 250);
+        material.opacity = 0.7;
 
         const particles = new THREE.Points( geometry, material );
         this.scene.add( particles ); 
