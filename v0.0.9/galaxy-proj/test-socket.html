@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Тест сети</title>
+</head>
+<body>
+    <h1>Тест Socket.io</h1>
+    <div id="status">Подключение...</div>
+    
+    <script type="importmap">
+        {
+            "imports": {
+                "socket.io-client": "https://cdn.socket.io/4.7.2/socket.io.esm.min.js"
+            }
+        }
+    </script>
+    
+    <script type="module">
+        import { io } from 'socket.io-client';
+        
+        const socket = io('http://localhost:3000');
+        const statusDiv = document.getElementById('status');
+        
+        socket.on('connect', () => {
+            statusDiv.innerHTML = 'Подключено! ID: ' + socket.id;
+            statusDiv.style.color = 'green';
+        });
+        
+        socket.on('your-id', (id) => {
+            statusDiv.innerHTML += `<br>Мой ID от сервера: ${id}`;
+        });
+        
+        socket.on('disconnect', () => {
+            statusDiv.innerHTML = 'Отключено';
+            statusDiv.style.color = 'red';
+        });
+    </script>
+</body>
+</html>

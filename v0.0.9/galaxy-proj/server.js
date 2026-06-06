@@ -26,10 +26,10 @@ io.on('connection', (socket) => {
 
     socket.emit('your-id', socket.id);
 
-    socket.on('disconect', () => {
+    socket.on('disconnect', () => {
         console.log(`====== Игрок отключился: ${socket.id} =======`);
         players.delete(socket.id);
-        socket.broadcast.emit('player-disconected', socket.id);
+        socket.broadcast.emit('player-disconnected', socket.id);
     });
 });
 
