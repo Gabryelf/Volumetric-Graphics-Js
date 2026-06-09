@@ -51,7 +51,7 @@
     <tr>
       <td align="center">🎨<br><b>Сеттинг на выбор</b></td>
       <td align="center">⚔️<br><b>Любая механика</b></td>
-      <td align="center">🌍<br><b>Мультиплеер 2+ игроков</b></td>
+      <td align="center">🌍<br><b>Мультиплеер 2+ пользователей</b></td>
       <td align="center">💾<br><b>Сохранение прогресса</b></td>
     </tr>
   </table>
@@ -105,7 +105,7 @@
 
 **Цель:** Создать работающий сервер с комнатами и базовым WebSocket соединением.
 
-#### 1.1 Инициализация
+#### Инициализация
 Ваша задача создать проект - root package и вложенные директории.
 Старайтесь сделать все максимально удобно и при этом по стандартам 
 модульной разработки. Избегайте больших и неудобных файлов которые создаете вручную, 
@@ -128,92 +128,6 @@
 кодовые файлы на одном или нескольких уровнях вложенности.
 
 
-#### 1.2 Структура папок - пример!
-```
-my-multiplayer-game/
-├── server/
-│   ├── models/          # Mongoose схемы (User, GameSession)
-│   ├── controllers/     # Логика пользователей, комнат
-│   ├── sockets/         # Обработчики socket.io
-│   ├── routes/          # API маршруты (auth, profile, shop)
-│   ├── utils/           # helpers, валидация
-│   └── index.js         # Точка входа сервера
-├── client/
-│   ├── src/
-│   │   ├── main.js      # Three.js инициализация
-│   │   ├── network/     # SocketClient.js
-│   │   ├── game/        # GameLoop, рендеринг
-│   │   └── ui/          # HTML/DOM интерфейсы (лобби, магазин)
-│   ├── index.html
-│   └── style.css
-├── .env                 # PORT, MONGO_URI, JWT_SECRET
-├── .gitignore
-└── README.md
-```
-
-#### 1.3 Простейший сервер (проверка WebSocket)
-<details>
-<summary><b>📄 server/index.js (минимальный пример)</b></summary>
-
-```javascript
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
-const cors = require('cors');
-require('dotenv').config();
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-app.use(express.static('client'));
-
-const server = http.createServer(app);
-const io = socketIo(server, { cors: { origin: '*' } });
-
-// Хранилище комнат (временное)
-const rooms = new Map();
-
-io.on('connection', (socket) => {
-  console.log(`🟢 Игрок подключился: ${socket.id}`);
-
-  socket.on('create_room', ({ playerName }, callback) => {
-    const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
-    rooms.set(roomId, { players: [{ id: socket.id, name: playerName }] });
-    socket.join(roomId);
-    callback({ success: true, roomId });
-  });
-
-  socket.on('join_room', ({ roomId, playerName }, callback) => {
-    const room = rooms.get(roomId);
-    if (!room) return callback({ success: false, error: 'Комната не найдена' });
-    if (room.players.length >= 4) return callback({ success: false, error: 'Комната полна' });
-    room.players.push({ id: socket.id, name: playerName });
-    socket.join(roomId);
-    io.to(roomId).emit('players_update', room.players);
-    callback({ success: true });
-  });
-
-  socket.on('disconnect', () => { /* очистка комнат */ });
-});
-
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`🚀 Сервер на http://localhost:${PORT}`));
-```
-</details>
-
-#### 1.4 Клиентский Socket клиент - пример!
-```javascript
-// client/src/network/SocketClient.js
-export class SocketClient {
-  constructor(url) {
-    this.socket = io(url);
-  }
-  createRoom(name) { /* ... */ }
-  joinRoom(roomId, name) { /* ... */ }
-  onPlayersUpdate(cb) { this.socket.on('players_update', cb); }
-}
-```
-
 ---
 
 ### Шаг 2: База данных и система аккаунтов может быть любой
@@ -231,43 +145,6 @@ export class SocketClient {
   <img src="https://img.shields.io/badge/статус-обязательно-blue?style=flat-square"/>
   <img src="https://img.shields.io/badge/балл-БД_и_прогресс-orange?style=flat-square"/>
 </div>
-
-#### 2.1 Модель пользователя (MongoDB / Mongoose) - пример
-
-```javascript
-// server/models/User.js
-const mongoose = require('mongoose');
-
-const UserSchema = new mongoose.Schema({
-  username: { type: String, unique: true, required: true },
-  passwordHash: { type: String, required: true },
-  currency: { type: Number, default: 500 },   // игровая валюта
-  stats: {
-    wins: { type: Number, default: 0 },
-    losses: { type: Number, default: 0 },
-    kills: { type: Number, default: 0 }
-  },
-  skins: [{ type: String }],                  // массив ID скинов
-  activeSkin: { type: String, default: 'default' },
-  upgrades: {
-    damage: { type: Number, default: 1 },
-    health: { type: Number, default: 100 },
-    speed: { type: Number, default: 5 }
-  }
-});
-
-module.exports = mongoose.model('User', UserSchema);
-```
-
-#### 2.2 API для регистрации / логина / профиля
-- `POST /api/auth/register` — создание нового игрока (хэш пароля bcrypt)
-- `POST /api/auth/login` — выдача JWT токена
-- `GET /api/profile` — получение данных игрока (валюты, улучшения)
-- `POST /api/shop/buy` — покупка скина/улучшения за валюту
-- `POST /api/battle/result` — обновление статистики после матча
-
-#### 2.3 Обязательное требование
-> **После завершения матча или другого логически обоснованного момента** сервер должен сохранить данные операции.
 
 ---
 
@@ -289,50 +166,6 @@ module.exports = mongoose.model('User', UserSchema);
   <img src="https://img.shields.io/badge/балл-оформление-orange?style=flat-square"/>
 </div>
 
-#### 3.1 Сцена, камера, освещение
-```javascript
-// client/src/main.js (минимальный скелет)
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0a1030);
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-camera.position.set(5, 4, 8);
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
-
-// Управление (для вашей игры нужно своё, без OrbitControls)
-const controls = new OrbitControls(camera, renderer.domElement);
-
-// Свет
-const ambientLight = new THREE.AmbientLight(0x404060);
-scene.add(ambientLight);
-const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-dirLight.position.set(2, 5, 3);
-scene.add(dirLight);
-
-// Пол/сетка
-const grid = new THREE.GridHelper(20, 20, 0x88aaff, 0x335588);
-scene.add(grid);
-
-// Анимация
-function animate() {
-  requestAnimationFrame(animate);
-  controls.update(); // для разработки, для игры — своя система
-  renderer.render(scene, camera);
-}
-animate();
-```
-
-#### 3.2 Игровой объект (например, модель вашего персонажа)
-- Используйте **примитивы** (BoxGeometry, SphereGeometry) или загрузите **GLTF модель** через `GLTFLoader`
-- Добавьте управление: `WASD` для движения, мышь для поворота
-
-#### 3.3 Отображение других пользователей (заглушка)
-Когда приходят данные с сервера (массив игроков), создайте для каждого сферу/куб и обновляйте её позицию или те данные которые будет логично обновлять в контексте вашего приложения.
-
 ---
 
 ### Шаг 4: Сетевая синхронизация
@@ -349,34 +182,6 @@ animate();
   <img src="https://img.shields.io/badge/балл-работоспособность-orange?style=flat-square"/>
 </div>
 
-#### 4.1 Отправка позиции с клиента
-```javascript
-setInterval(() => {
-  if (socket && playerId) {
-    socket.emit('player_move', {
-      id: playerId,
-      position: { x: myMesh.position.x, y: myMesh.position.y, z: myMesh.position.z },
-      rotation: { yaw: camera.rotation.y }
-    });
-  }
-}, 50);
-```
-
-#### 4.2 Серверная рассылка
-```javascript
-socket.on('player_move', (data) => {
-  socket.to(roomId).emit('other_moved', data);
-});
-```
-
-#### 4.3 Создание/удаление пользователей
-При `user_update` добавляйте новых игроков в сцену, удаляйте отключившихся.
-
-#### 4.4 Взаимодействие (атака)
-- Клиент: при клике мыши отправляем `attack` с targetId
-- Сервер: проверяет дистанцию, наносит урон, рассылает событие `hit`
-- Клиент получателя: уменьшает здоровье, обновляет UI
-
 ---
 
 ### Шаг 5: Лобби, сессии, прогресс и магазин
@@ -391,29 +196,6 @@ socket.on('player_move', (data) => {
   <img src="https://img.shields.io/badge/статус-обязательно-blue?style=flat-square"/>
   <img src="https://img.shields.io/badge/балл-БД_и_прогресс-orange?style=flat-square"/>
 </div>
-
-#### 5.1 Интерфейс лобби (HTML/CSS)
-- Список существующих комнат (получать через `GET /api/rooms`)
-- Кнопка «Создать комнату» → форма с названием и выбором карты
-- Кнопка «Присоединиться по коду» → поле ввода кода
-- Профиль пользователя: отображение валюты, скинов, улучшений
-
-#### 5.2 Магазин улучшений (пример)
-| Улучшение | Стоимость | Эффект |
-|-----------|-----------|--------|
-| Урон +5    | 200 монет | +5 к урону |
-| Скорость +10% | 150 монет | быстрее бег |
-| Новый скин «Дракон» | 500 монет | меняет модель |
-
-#### 5.3 Сохранение прогресса после матча
-```javascript
-// После определения победителя
-socket.on('match_end', async ({ winnerId, loserId, kills }) => {
-  await User.findByIdAndUpdate(winnerId, { $inc: { currency: 100, 'stats.wins': 1, 'stats.kills': kills } });
-  await User.findByIdAndUpdate(loserId, { $inc: { currency: 30, 'stats.losses': 1 } });
-  // обновить клиентам
-});
-```
 
 ---
 
