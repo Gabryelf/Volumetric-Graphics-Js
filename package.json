@@ -1,6 +1,6 @@
 {
   "name": "galaxy-proj",
-  "version": "0.0.6",
+  "version": "0.1.2",
   "description": "<!--\r   ИТОГОВЫЙ ЭКЗАМЕН: Fullstack Мультиплеерная игра\r   Дисциплина: Веб-разработка / Технологии интерактивных систем\r   Преподаватель: [@Gabryelf - Валеев Сергей]\r -->",
   "private": true,
   "type": "module",
@@ -12,7 +12,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node server.js"
   },
   "devDependencies": {
     "vite": "^8.0.12"
