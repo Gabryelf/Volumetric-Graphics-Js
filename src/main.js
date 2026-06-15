@@ -27,6 +27,9 @@ class Main{
 
         this.networkManager = null;
         this.remotePlayers = new Map();
+
+        this.fuel = 100;
+        this.isMoving = false;
         
         this.init()
     }
@@ -70,6 +73,11 @@ class Main{
                     remote.targetPosition = data.position;
                     remote.targetRotation = data.rotation;
                 }
+            };
+
+            this.networkManager.onFuelUpdate = (fuel) => {
+                this.fuel = fuel;
+                console.log(`Топливо обновлено: ${this.fuel}%`);
             };
 
             const modelIndex = 0;
@@ -117,7 +125,9 @@ class Main{
     }
 
     setupControls(){
+        const FUEL_COST = 0.3;
         window.addEventListener('keydown', (event) => {
+            let moved = false;
             if(event.key === 'a'){
                 this.model.rotation.z -= 0.01;
             }
@@ -125,10 +135,18 @@ class Main{
                 this.model.rotation.z += 0.01;
             }
             if(event.key === 'w'){
-                this.model.position.z += 0.03;
+                if (this.fuel > 0){
+                    this.model.position.z += 0.03;
+                    this.fuel = Math.max(0, this.fuel - FUEL_COST);
+                    moved = true;
+                }  
             }
             if(event.key === 's'){
-                this.model.position.z -= 0.03;
+                if(this.fuel > 0){
+                    this.model.position.z -= 0.03;
+                    this.fuel = Math.max(0, this.fuel - FUEL_COST);
+                    moved = true;
+                }
             }
         })
     }
@@ -143,18 +161,23 @@ class Main{
 
         const delta = this.clock.getDelta();
 
-        if(this.model){
-            this.cameraManager.update(this.model, delta);
-        }
-
         for(const[_, remote] of this.remotePlayers){
             if(remote.model && remote.targetPosition){
                 remote.model.position.lerp(remote.targetPosition, 0.3);
+                if (remote.targetRotation) {
+                    remote.model.rotation.x += (remote.targetRotation.x - remote.model.rotation.x) * 0.3;
+                    remote.model.rotation.y += (remote.targetRotation.y - remote.model.rotation.y) * 0.3;
+                    remote.model.rotation.z += (remote.targetRotation.z - remote.model.rotation.z) * 0.3;
+                }
             }
         }
 
         if (this.networkManager) {
-            this.networkManager.sendPosition(this.model.position, this.model.rotation);
+            this.networkManager.sendPosition(this.model.position, this.model.rotation, this.fuel);
+        }
+
+        if(this.model){
+            this.cameraManager.update(this.model, delta);
         }
 
         if(this.cameraManager){

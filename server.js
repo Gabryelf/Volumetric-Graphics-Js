@@ -4,6 +4,7 @@ import {Server} from 'socket.io';
 import {fileURLToPath} from 'url';
 import {dirname} from 'path';
 import {Player} from './src/entities/Player.js'
+import { dbManager } from './src/database/DatabaseManager.js';
 //___________ ищем папку в которой лежит файл сервера
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -15,6 +16,9 @@ fastify.register(fastifyStatic,{root: __dirname});
 fastify.get('/', (_, reply) => {
     reply.sendFile('index.html');
 });
+//___________ подключаем базу данных после создания сервера
+await dbManager.connect();
+
 //___________ поднимаем сервер и слушаем клиенты
 fastify.listen({port: PORT, host: '0.0.0.0'}, () => {
     console.log(`http://localhost:${PORT}`);
@@ -27,18 +31,24 @@ const io = new Server(fastify.server);
 const sessions = new Map();
 //___________ ожидаем запрос от клиентов по TCP соединению и прослушиваем события
 io.on('connection', (socket) => {
-    socket.on('join', (sessionId, playerName, selectModel) => {
+    socket.on('join', async(sessionId, playerName, selectModel) => {
         if(!sessions.has(sessionId)){
             sessions.set(sessionId, new Map());
         }
         const session = sessions.get(sessionId);
-        const player = new Player(socket.id, playerName, selectModel);
+
+        const savedFuel = await dbManager.loadFuel(socket.id);
+        const initialFuel = (savedFuel !== null && savedFuel !== undefined) ? savedFuel : 100;
+        const player = new Player(socket.id, playerName, selectModel, initialFuel);
 
         session.set(socket.id, player);
+
+        socket.emit('fuelUpdate', player.fuel);
 
         const otherPlayers = Array.from(session.values()).filter(player => player.id !== socket.id);
         socket.emit('init', otherPlayers);
         socket.broadcast.emit('playerJoined', player);
+
     });
 
     socket.on('move', (position, rotation) => {
@@ -59,9 +69,11 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('disconnect', (sessionId) => {
+    socket.on('disconnect', async() => {
         for(const [sessionId, session] of sessions){
             if(session.has(socket.id)){
+                const player = session.get(socket.id);
+                await dbManager.saveFuel(socket.id, player.fuel);
                 session.delete(socket.id);
                 socket.broadcast.emit('playerLeft', socket.id);
                 if(session.size === 0){

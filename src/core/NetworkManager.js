@@ -12,8 +12,13 @@ export class NetworkManager{
         this.onPlayerMoved = null;
         this.onPlayerLeft = null;
 
+        this.onFuelUpdate = null;
+        this.onOutOfFuel = null;
+
         this.position = null;
         this.rotation = null;
+        this.fuel = null;
+        
     }
 
     connect(sessionId, playerName, modelShip){
@@ -38,6 +43,14 @@ export class NetworkManager{
             if (this.onPlayerMove) this.onPlayerMove(data);
         });
 
+        this.socket.on('fuelUpdate', (fuel) => {
+            if (this.onFuelUpdate) this.onFuelUpdate(fuel);
+        });
+        
+        this.socket.on('outOfFuel', () => {
+            if (this.onOutOfFuel) this.onOutOfFuel();
+        });
+
         this.socket.on('playerLeft', (id) => {
             if (this.onPlayerLeave) this.onPlayerLeave(id);
         });
@@ -49,8 +62,11 @@ export class NetworkManager{
         }, 50);
     }
 
-    sendPosition(position, rotation){
+    sendPosition(position, rotation, fuel = null){
         this.position = { x: position.x, y: position.y, z: position.z };
         this.rotation = { x: rotation.x, y: rotation.y, z: rotation.z };
+        if (fuel !== null) {
+            this.fuel = fuel;
+        }
     }
 }
