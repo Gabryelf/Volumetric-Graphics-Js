@@ -1,6 +1,6 @@
 {
   "name": "galaxy-proj",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "description": "<!--\r   ИТОГОВЫЙ ЭКЗАМЕН: Fullstack Мультиплеерная игра\r   Дисциплина: Веб-разработка / Технологии интерактивных систем\r   Преподаватель: [@Gabryelf - Валеев Сергей]\r -->",
   "private": true,
   "type": "module",
@@ -28,6 +28,7 @@
     "dotenv": "^17.4.2",
     "fastify": "^5.8.5",
     "mongodb": "^7.3.0",
+    "pg": "^8.21.0",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "three": "^0.184.0",

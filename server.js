@@ -17,7 +17,8 @@ fastify.get('/', (_, reply) => {
     reply.sendFile('index.html');
 });
 //___________ подключаем базу данных после создания сервера
-await dbManager.connect();
+//await dbManager.useMongo(); // mongo db init
+await dbManager.usePostgres('postgresql://data_node_user:Ba8BCs7ERZaKvi3KuhoGRZklFsWBh7mt@dpg-d8o7co6rnols73cn1eb0-a.oregon-postgres.render.com/data_node');
 
 //___________ поднимаем сервер и слушаем клиенты
 fastify.listen({port: PORT, host: '0.0.0.0'}, () => {
