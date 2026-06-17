@@ -1,92 +1,134 @@
-import Fastify from 'fastify';
+import Fastify from "fastify";
 import fastifyStatic from '@fastify/static';
-import {Server} from 'socket.io';
-import {fileURLToPath} from 'url';
-import {dirname} from 'path';
-import {Player} from './src/entities/Player.js'
-import { dbManager } from './src/database/DatabaseManager.js';
-//___________ ищем папку в которой лежит файл сервера
+import { Server } from 'socket.io';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-//___________ инициализируем сервер
-const fastify = Fastify({logger: false});
-const PORT = 8000;
-//___________ регистрируем статические файлы и отдаем по основному запросу
-fastify.register(fastifyStatic,{root: __dirname});
-fastify.get('/', (_, reply) => {
-    reply.sendFile('index.html');
-});
-//___________ подключаем базу данных после создания сервера
-//await dbManager.useMongo(); // mongo db init
-await dbManager.usePostgres('postgresql://data_node_user:Ba8BCs7ERZaKvi3KuhoGRZklFsWBh7mt@dpg-d8o7co6rnols73cn1eb0-a.oregon-postgres.render.com/data_node');
+const fastify = Fastify({ logger: false });
+const port = 3000;
 
-//___________ поднимаем сервер и слушаем клиенты
-fastify.listen({port: PORT, host: '0.0.0.0'}, () => {
-    console.log(`http://localhost:${PORT}`);
-    console.log(`Игрок 1: http://localhost:${PORT}/?session=game1&name=Player1`);
-    console.log(`Игрок 2: http://localhost:${PORT}/?session=game1&name=Player2`);
-});
+fastify.register(fastifyStatic, { root: __dirname });
+fastify.get('/', (_, reply) => reply.sendFile('index.html'));
 
-//___________ создаем сервер для вебсокета и инициализируем сессии
-const io = new Server(fastify.server);
 const sessions = new Map();
-//___________ ожидаем запрос от клиентов по TCP соединению и прослушиваем события
-io.on('connection', (socket) => {
-    socket.on('join', async(sessionId, playerName, selectModel) => {
-        if(!sessions.has(sessionId)){
-            sessions.set(sessionId, new Map());
-        }
-        const session = sessions.get(sessionId);
+const sessionMetadata = new Map();
+const playerDataMap = new Map();
 
-        const savedFuel = await dbManager.loadFuel(socket.id);
-        const initialFuel = (savedFuel !== null && savedFuel !== undefined) ? savedFuel : 100;
-        const player = new Player(socket.id, playerName, selectModel, initialFuel);
-
-        session.set(socket.id, player);
-
-        socket.emit('fuelUpdate', player.fuel);
-
-        const otherPlayers = Array.from(session.values()).filter(player => player.id !== socket.id);
-        socket.emit('init', otherPlayers);
-        socket.broadcast.emit('playerJoined', player);
-
-    });
-
-    socket.on('move', (position, rotation) => {
-        for(const [_, session] of sessions){
-            if(session.has(socket.id)){
-                const player = session.get(socket.id);
-                if(player){
-                    player.position = position,
-                    player.rotation = rotation
-                    socket.broadcast.emit('playerMoved', {
-                        id: socket.id,
-                        position,
-                        rotation
-                    });
-                }
-                break;
-            }
-        }
-    });
-
-    socket.on('disconnect', async() => {
-        for(const [sessionId, session] of sessions){
-            if(session.has(socket.id)){
-                const player = session.get(socket.id);
-                await dbManager.saveFuel(socket.id, player.fuel);
-                session.delete(socket.id);
-                socket.broadcast.emit('playerLeft', socket.id);
-                if(session.size === 0){
-                    sessions.delete(sessionId);
-                }
-                break;
-            }
-        }
-    });
+fastify.get('/api/sessions', async (_, reply) => {
+    const sessionList = [];
+    for (const [sessionId, players] of sessions) {
+        sessionList.push({
+            id: sessionId,
+            players: players.size,
+            created: sessionMetadata.get(sessionId)?.created || Date.now()
+        });
+    }
+    sessionList.sort((a, b) => b.created - a.created);
+    return reply.send(sessionList);
 });
 
+fastify.post('/api/create-session', async (request, reply) => {
+    const { playerName } = request.body;
+    const sessionId = `game_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    sessions.set(sessionId, new Map());
+    sessionMetadata.set(sessionId, { created: Date.now() });
+    return reply.send({ sessionId });
+});
 
+setInterval(() => {
+    for (const [sessionId, players] of sessions) {
+        if (players.size === 0) {
+            sessions.delete(sessionId);
+            sessionMetadata.delete(sessionId);
+        }
+    }
+}, 30000);
 
+fastify.listen({ port, host: '0.0.0.0' }, () => {
+    console.log(`SERVER RUN: http://localhost:${port}`);
+});
 
+const io = new Server(fastify.server);
 
+class PlayerData {
+    constructor(socketId, playerName, currentModel) {
+        this.id = socketId;
+        this.name = playerName;
+        this.currentModel = currentModel || 0;
+        this.position = { x: 0, y: 0, z: 0 };
+        this.rotation = { x: 0, y: 0, z: 0 };
+        this.sessionId = null;
+    }
+}
+
+io.on('connection', (socket) => {
+    socket.on('join', (sessionId, playerName, currentModel) => {
+        if (!sessions.has(sessionId)) {
+            sessions.set(sessionId, new Map());
+            sessionMetadata.set(sessionId, { created: Date.now() });
+        }
+        
+        const session = sessions.get(sessionId);
+        const playerData = new PlayerData(socket.id, playerName, currentModel);
+        playerData.sessionId = sessionId;
+        
+        session.set(socket.id, playerData);
+        playerDataMap.set(socket.id, playerData);
+        
+        const otherPlayers = Array.from(session.values())
+            .filter(p => p.id !== socket.id)
+            .map(p => ({
+                id: p.id,
+                name: p.name,
+                currentModel: p.currentModel,
+                position: p.position,
+                rotation: p.rotation
+            }));
+        
+        socket.emit('init', otherPlayers);
+        socket.broadcast.to(sessionId).emit('playerJoined', {
+            id: playerData.id,
+            name: playerData.name,
+            currentModel: playerData.currentModel,
+            position: playerData.position,
+            rotation: playerData.rotation
+        });
+        
+        socket.join(sessionId);
+    });
+    
+    socket.on('move', (position, rotation) => {
+        const playerData = playerDataMap.get(socket.id);
+        if (!playerData) return;
+        
+        const sessionId = playerData.sessionId;
+        if (!sessionId) return;
+        
+        playerData.position = position;
+        playerData.rotation = rotation;
+        
+        socket.to(sessionId).emit('playerMoved', {
+            id: socket.id,
+            position,
+            rotation
+        });
+    });
+    
+    socket.on('disconnect', () => {
+        const playerData = playerDataMap.get(socket.id);
+        if (!playerData) return;
+        
+        const sessionId = playerData.sessionId;
+        if (!sessionId) return;
+        
+        const session = sessions.get(sessionId);
+        if (session) {
+            session.delete(socket.id);
+            socket.to(sessionId).emit('playerLeft', socket.id);
+        }
+        
+        playerDataMap.delete(socket.id);
+    });
+});
